@@ -1,0 +1,48 @@
+# STAT 327 Group work on Optimization
+
+Please write the names and email addresses of your group members.
+Here's an example:
+
+* Name / email (@wisc.edu only): John Gillett / jgillett@wisc.edu
+
+* Name / email (@wisc.edu only): ...
+* Name / email (@wisc.edu only): ...
+* Name / email (@wisc.edu only): ...
+* Name / email (@wisc.edu only): ...
+* Name / email (@wisc.edu only): ...
+* Name / email (@wisc.edu only): ...
+
+# Part 1: One-dimensional optimization
+
+f = function(x) {
+  return(100 + (80/15) * (55 + (80 * 9.81) / 15) * (1 - exp(-(15/80) * x)) - ((80 * 9.81) / 15)  * x )
+}
+
+f_abs = function(x) {
+  return(abs(100 + (80/15) * (55 + (80 * 9.81) / 15) * (1 - exp(-(15/80) * x)) - ((80 * 9.81) / 15)  * x ))
+}
+
+
+Graph the object's altitude vs. time.
+
+# display graph of object's altitude function from time 0 to 12
+curve(f, 0, 12)
+
+Find the time at which the object strikes the ground.
+
+# optimize the absolute value of the function to set floor of 0
+out_min <- optimize(f_abs, c(0,15))
+
+# display
+
+Find the object's maximum height.
+
+# optimize the maximum value of the function
+out_max <- optimize(f, c(0,15), maximum = TRUE)
+
+
+Find the time at which the object reaches its maximum height.
+
+```{r}
+
+```
