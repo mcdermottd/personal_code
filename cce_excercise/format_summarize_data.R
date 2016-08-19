@@ -24,6 +24,9 @@
 # ==== set parms ====
 #====================#
 
+  # set directory
+  p_dir <- "C:/Users/Drew/Dropbox/analysis_data/cce_excercise/"
+
   # output toggle
   p_opt_exp <- 0
 
@@ -32,7 +35,7 @@
 #====================#
 
   # load student data file
-  in_raw_data <- data.table(read_excel("C:/Users/Drew/Dropbox/analysis_data/cce_excercise/Mock_SUYI_student_data_F14.xlsx", col_types = rep("text", 33)))
+  in_raw_data <- data.table(read_excel(paste0(p_dir, "raw_data/Mock_SUYI_student_data_F14.xlsx"), col_types = rep("text", 33)))
 
 #==========================#
 # ==== format raw data ====
@@ -90,6 +93,9 @@
   # copy dummy function output
   student_data_dummy <- copy(out_dummy_vars$out_data_dummy)
   
+  #remove: non-dummied set
+  rm(student_data_set)
+  
 #========================================#
 # ==== convert test score to z-units ====
 #========================================#
@@ -131,16 +137,22 @@
   out_stacked_zcore <- ea_extract(out_zscore_list)
   
   # copy zscore function output
-  student_data_dummy <- copy(out_stacked_zcore$out_data_zscore)
+  student_data_zscore <- copy(out_stacked_zcore$out_data_zscore)
+  
+  #remove: dummy set
+  rm(student_data_dummy)
   
 #=================#
 # ==== export ====
 #=================#
 
+  # copy data to export
+  out_student_data <- copy(student_data_zscore)
+  
   # export
   if (p_opt_exp == 1) { 
     
-    ea_write(output_set, ".csv")
-    save(return_list, file = ".rdata", compress = TRUE)
+    ea_write(out_student_data, paste0(p_dir, "input_data/student_data_format.csv"))
+    save(out_student_data, file = paste0(p_dir, "input_data/student_data_format.rdata"), compress = TRUE)
   }
 
