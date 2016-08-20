@@ -142,6 +142,13 @@
   #remove: dummy set
   rm(student_data_dummy)
   
+#=======================#
+# ==== final format ====
+#=======================#
+  
+  # reorder vars
+  ea_colorder(student_data_zscore, c("model_descr", "dm_student_id", "dm_grade", "dm_race", "dm_hispanic"))
+  
 #=================#
 # ==== export ====
 #=================#
