@@ -28,7 +28,7 @@
   p_dir <- "C:/Users/Drew/Dropbox/analysis_data/cce_excercise/"
 
   # output toggle
-  p_opt_exp <- 0
+  p_opt_exp <- 1
 
 #====================#
 # ==== load data ====
@@ -79,15 +79,19 @@
   student_data_set[dm_hispanic == "hispanic/latino",     dm_hispanic := "y"]
   student_data_set[dm_hispanic == "not hispanic/latino", dm_hispanic := "n"]
   
+  # create gender vars to dummy
+  student_data_set[, female := ifelse(sex == "F", "y", "n")]
+  student_data_set[, male   := ifelse(sex == "M", "y", "n")]
+
   # adj. / combine race values to dummy
   student_data_set[dm_race == "african american/black", dm_race := "black"]
   student_data_set[chmatch(dm_race, c("asian indian", "cambodian", "chinese", "filipino", "japanese", "korean", "vietnamese", "samoan", "other asian"),
                            nomatch = 0) != FALSE, dm_race := "asian"]
-  student_data_set[chmatch(dm_race, c("alaska native", "other american indian"), nomatch = 0) != FALSE, dm_race := "asian"]
-    
+  student_data_set[chmatch(dm_race, c("alaska native", "other american indian"), nomatch = 0) != FALSE, dm_race := "amer_indian"]
+
   # run dummy function
   out_dummy_vars <- db_dummy(in_data            = student_data_set,
-                             in_vars_dummy      = c("dm_hispanic", "dm_race", "sped", "homeless"),
+                             in_vars_dummy      = c("male", "female", "dm_hispanic", "dm_race", "sped", "homeless"),
                              opt_data_frequency = TRUE)
   
   # copy dummy function output
