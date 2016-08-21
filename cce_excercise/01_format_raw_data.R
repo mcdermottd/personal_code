@@ -97,9 +97,9 @@
                            nomatch = 0) != FALSE, dm_race := "asian"]
   student_data_set[chmatch(dm_race, c("alaska native", "other american indian"), nomatch = 0) != FALSE, dm_race := "amer_indian"]
 
-#===========================================#
-# ==== convert assessment vars to dummy ====
-#===========================================#
+#=================================#
+# ==== format assessment vars ====
+#=================================#
   
   # create pl level vars
   student_data_set[, ":="(dm_pl_math = msp_hspemathlevel_14, dm_pl_read = msp_hspereadlevel_14)]
@@ -111,6 +111,13 @@
   # change "MO" to missing #brule #check
   student_data_set[dm_pl_math == "MO", dm_pl_math := NA]
   student_data_set[dm_pl_read == "MO", dm_pl_read := NA]
+  
+  # if relevant score is missing, set PL level to NA #brule
+  student_data_set[is.na(msp_hspemathscore_14), dm_pl_math := NA]
+  student_data_set[is.na(msp_hspereadscore_14), dm_pl_read := NA]
+  
+  # set GPA var of 0 to missing #brule
+  student_data_set[gpa_14 == "0", gpa_14 := NA]
   
 #==============================#
 # ==== dummy relevant vars ====
