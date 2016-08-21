@@ -54,14 +54,6 @@
   # create student id var
   student_data_set[, dm_student_id := paste0("dm_", rownames(student_data_set))]
   
-  # create grade var
-  student_data_set[, dm_grade := grade]
-  student_data_set[dm_grade == "K", dm_grade := "0"]
-  student_data_set[nchar(dm_grade) == 1, dm_grade := paste0("0", dm_grade)]
-  
-  # create model descr var from grade
-  student_data_set[, model_descr := paste0("dm_", dm_grade)]
-  
   # identify vars with year in name
   yr_vars_13 <- grep("2013", colnames(student_data_set), value = TRUE)
   yr_vars_14 <- grep("2014", colnames(student_data_set), value = TRUE)
@@ -97,6 +89,29 @@
                            nomatch = 0) != FALSE, dm_race := "asian"]
   student_data_set[chmatch(dm_race, c("alaska native", "other american indian"), nomatch = 0) != FALSE, dm_race := "amer_indian"]
 
+#============================================#
+# ==== create grade and school type vars ====
+#============================================#
+
+  # create grade var (set K to grade 0)
+  student_data_set[, dm_grade := grade]
+  student_data_set[dm_grade == "K", dm_grade := "0"]
+  
+  # convert to numeric
+  student_data_set[, dm_grade := as.numeric(dm_grade)]
+  
+  # create grade type vars #brule
+  student_data_set[dm_grade < 3, sch_type := "ps"]
+  student_data_set[dm_grade > 2 & dm_grade < 9, sch_type := "es_ms"]
+  student_data_set[dm_grade > 8, sch_type := "hs"]
+  
+  # change grade back to character and format
+  student_data_set[, dm_grade := as.character(dm_grade)]
+  student_data_set[nchar(dm_grade) == 1, dm_grade := paste0("0", dm_grade)]
+  
+  # create model descr var from grade
+  student_data_set[, model_descr := paste0("dm_", dm_grade)]
+  
 #=================================#
 # ==== format assessment vars ====
 #=================================#
@@ -138,9 +153,9 @@
   #remove: non-dummied set
   rm(student_data_set)
   
-#========================================#
-# ==== convert test score to z-units ====
-#========================================#
+#=========================================#
+# ==== convert test scores to z-units ====
+#=========================================#
   
   # set scores to z
   tests_to_z <- c("msp_hspemathscore_14", "msp_hspereadscore_14")
@@ -189,7 +204,8 @@
 #=======================#
   
   # reorder vars
-  ea_colorder(student_data_zscore, c("model_descr", "dm_student_id", "dm_grade", "dm_race", "dm_hispanic"))
+  ea_colorder(student_data_zscore, c("model_descr", "dm_student_id", "sex", "dm_race", "dm_hispanic", "sped", "homeless", "suyi_focus_students",
+                                     "sch_type", "dm_grade", "schoolname2010"))
   
 #=================#
 # ==== export ====
