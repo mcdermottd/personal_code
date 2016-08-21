@@ -3,7 +3,7 @@
 # - purpose:
 # - inputs:
 # - outputs:
-# - keywords:
+# - keywords: #brule #check
 # - general:
 ######################################################################.
 
@@ -61,10 +61,18 @@
   
   # create model descr var from grade
   student_data_set[, model_descr := paste0("dm_", dm_grade)]
-    
-#===================================#
-# ==== convert demographic vars ====
-#===================================#
+  
+  # identify vars with year in name
+  yr_vars_13 <- grep("2013", colnames(student_data_set), value = TRUE)
+  yr_vars_14 <- grep("2014", colnames(student_data_set), value = TRUE)
+
+  # rename year vars
+  setnames(student_data_set, yr_vars_13, paste0(gsub("2013", "", yr_vars_13), "_13"))
+  setnames(student_data_set, yr_vars_14, paste0(gsub("2014", "", yr_vars_14), "_14"))
+
+#============================================#
+# ==== convert demographic vars to dummy ====
+#============================================#
   
   # rename homeless var to dummy
   setnames(student_data_set, c("ishomeless"), c("homeless"))
@@ -83,19 +91,42 @@
   student_data_set[, female := ifelse(sex == "F", "y", "n")]
   student_data_set[, male   := ifelse(sex == "M", "y", "n")]
 
-  # adj. / combine race values to dummy
+  # adj. / combine race values to dummy #brule
   student_data_set[dm_race == "african american/black", dm_race := "black"]
   student_data_set[chmatch(dm_race, c("asian indian", "cambodian", "chinese", "filipino", "japanese", "korean", "vietnamese", "samoan", "other asian"),
                            nomatch = 0) != FALSE, dm_race := "asian"]
   student_data_set[chmatch(dm_race, c("alaska native", "other american indian"), nomatch = 0) != FALSE, dm_race := "amer_indian"]
 
+#===========================================#
+# ==== convert assessment vars to dummy ====
+#===========================================#
+  
+  # create pl level vars
+  student_data_set[, ":="(dm_pl_math = msp_hspemathlevel_14, dm_pl_read = msp_hspereadlevel_14)]
+
+  # change missings to NA #brule
+  student_data_set[dm_pl_math == "--", dm_pl_math := NA]
+  student_data_set[dm_pl_read == "--", dm_pl_read := NA]
+  
+  # change "MO" to missing #brule #check
+  student_data_set[dm_pl_math == "MO", dm_pl_math := NA]
+  student_data_set[dm_pl_read == "MO", dm_pl_read := NA]
+  
+#==============================#
+# ==== dummy relevant vars ====
+#==============================#
+
   # run dummy function
   out_dummy_vars <- db_dummy(in_data            = student_data_set,
-                             in_vars_dummy      = c("male", "female", "dm_hispanic", "dm_race", "sped", "homeless"),
+                             in_vars_dummy      = c("male", "female", "dm_hispanic", "dm_race", "sped", "homeless", "dm_pl_math", "dm_pl_read"),
                              opt_data_frequency = TRUE)
   
   # copy dummy function output
   student_data_dummy <- copy(out_dummy_vars$out_data_dummy)
+  
+  # change missing back to NA #check db_dummy function issue
+  student_data_dummy[dm_pl_math == "missing", dm_pl_math := NA]
+  student_data_dummy[dm_pl_read == "missing", dm_pl_read := NA]
   
   #remove: non-dummied set
   rm(student_data_set)
@@ -105,7 +136,7 @@
 #========================================#
   
   # set scores to z
-  tests_to_z <- c("2013fallmathrit", "2014wtrmathrit", "2014sprmathrit", "2013fallreadrit", "2014wtrreadrit", "2014sprreadrit")
+  tests_to_z <- c("msp_hspemathscore_14", "msp_hspereadscore_14")
   
   # convert test score vars to numeric
   student_data_dummy[, tests_to_z] <- lapply(student_data_dummy[, tests_to_z, with = FALSE], as.numeric)
@@ -144,7 +175,7 @@
   student_data_zscore <- copy(out_stacked_zcore$out_data_zscore)
   
   #remove: dummy set
-  rm(student_data_dummy)
+  rm(student_data_dummy, zscore_set, out_zscore_list)
   
 #=======================#
 # ==== final format ====
@@ -163,7 +194,13 @@
   # export
   if (p_opt_exp == 1) { 
     
+    # output formatted data sets
     ea_write(out_student_data, paste0(p_dir, "input_data/student_data_format.csv"))
     save(out_student_data, file = paste0(p_dir, "input_data/student_data_format.rdata"), compress = TRUE)
+    
+    # output dummy and zscore stats
+    ea_write(out_dummy_vars$out_dummy_freqs, paste0(p_dir, "qc/freq_dummy_vars.csv"))
+    ea_write(out_stacked_zcore$out_data_zparms, paste0(p_dir, "qc/zscore_parameters.csv"))
+    
   }
 
