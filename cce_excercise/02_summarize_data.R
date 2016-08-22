@@ -18,7 +18,6 @@
   # load packages
   library(readxl)
   library(data.table)
-  library(eaanalysis)
 
 #====================#
 # ==== set parms ====
