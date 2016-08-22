@@ -66,11 +66,11 @@
 # ==== format demographic vars ====
 #==================================#
   
-  # rename homeless var to dummy
-  setnames(student_data_set, c("ishomeless"), c("homeless"))
+  # rename transitional bilingual and homeless var to dummy
+  setnames(student_data_set, c("bilg_14", "ishomeless"), c("ell", "homeless"))
   
-  # convert sped and homeless values to lowercase
-  student_data_set[, ":="(sped = tolower(sped), homeless = tolower(homeless))]
+  # convert sped, ell (transitional bilingual), homeless values to lowercase
+  student_data_set[, ":="(sped = tolower(sped), ell = tolower(ell), homeless = tolower(homeless))]
   
   # create dm race and demo vars
   student_data_set[, ":="(dm_race = tolower(racedesc_p), dm_hispanic = tolower(ethnicitydesc_p))]
@@ -120,6 +120,13 @@
 # ==== format assessment vars ====
 #=================================#
   
+  # set scores to z
+  tests_to_z <- c("msp_hspemathscore_14", "msp_hspereadscore_14")
+  
+  # convert neccessary vars to numeric
+  student_data_set[, c(tests_to_z, "daysunexcused", "daysenrolled")] <- lapply(student_data_set[, c(tests_to_z, "daysunexcused", "daysenrolled"), 
+                                                                                                with = FALSE], as.numeric)
+  
   # create pl level vars
   student_data_set[, ":="(dm_pl_math = msp_hspemathlevel_14, dm_pl_read = msp_hspereadlevel_14)]
 
@@ -138,13 +145,16 @@
   # set GPA var of 0 to missing #brule
   student_data_set[gpa_14 == "0", gpa_14 := NA]
   
+  # compute unexcused absence rate
+  student_data_set[, unexcused_rate := daysunexcused / daysenrolled]
+  
 #==============================#
 # ==== dummy relevant vars ====
 #==============================#
 
   # run dummy function
   out_dummy_vars <- db_dummy(in_data            = student_data_set,
-                             in_vars_dummy      = c("male", "female", "dm_hispanic", "dm_race", "sped", "homeless", "dm_pl_math", "dm_pl_read"),
+                             in_vars_dummy      = c("male", "female", "dm_hispanic", "dm_race", "sped", "ell", "homeless", "dm_pl_math", "dm_pl_read"),
                              opt_data_frequency = TRUE)
   
   # copy dummy function output
@@ -160,12 +170,6 @@
 #=========================================#
 # ==== convert test scores to z-units ====
 #=========================================#
-  
-  # set scores to z
-  tests_to_z <- c("msp_hspemathscore_14", "msp_hspereadscore_14")
-  
-  # convert test score vars to numeric
-  student_data_dummy[, tests_to_z] <- lapply(student_data_dummy[, tests_to_z, with = FALSE], as.numeric)
   
   # initialize list for loop
   out_zscore_list <- list()
@@ -208,8 +212,8 @@
 #=======================#
   
   # reorder vars
-  ea_colorder(student_data_zscore, c("model_descr", "dm_student_id", "sex", "dm_race", "dm_hispanic", "sped", "homeless", "suyi_focus_students", 
-                                     "plang_non_engl", "sch_type", "dm_grade", "schoolname2010"))
+  ea_colorder(student_data_zscore, c("model_descr", "dm_student_id", "sex", "dm_race", "dm_hispanic", "sped", "ell", "plang_non_engl", "homeless",
+                                     "suyi_focus_students", "sch_type", "dm_grade", "schoolname2010"))
   
 #=================#
 # ==== export ====
