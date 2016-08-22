@@ -101,6 +101,7 @@
                                                perc_black       = dm_mean(d_dm_race_black),
                                                perc_asian       = dm_mean(d_dm_race_asian),
                                                perc_amer_indian = dm_mean(d_dm_race_amer_indian),
+                                               perc_plang_ne    = dm_mean(plang_non_engl),
                                                perc_sped        = dm_mean(d_sped_y),
                                                perc_homeless    = dm_mean(d_homeless_y))]
   # summarize demographic vars - by grade
@@ -112,6 +113,7 @@
                                            perc_black       = dm_mean(d_dm_race_black),
                                            perc_asian       = dm_mean(d_dm_race_asian),
                                            perc_amer_indian = dm_mean(d_dm_race_amer_indian),
+                                           perc_plang_ne    = dm_mean(plang_non_engl),
                                            perc_sped        = dm_mean(d_sped_y),
                                            perc_homeless    = dm_mean(d_homeless_y)),
                                     by = c("dm_grade")]
@@ -125,6 +127,7 @@
                                                 perc_black       = dm_mean(d_dm_race_black),
                                                 perc_asian       = dm_mean(d_dm_race_asian),
                                                 perc_amer_indian = dm_mean(d_dm_race_amer_indian),
+                                                perc_plang_ne    = dm_mean(plang_non_engl),
                                                 perc_sped        = dm_mean(d_sped_y),
                                                 perc_homeless    = dm_mean(d_homeless_y)),
                                          by = c("sch_type")]
@@ -138,6 +141,7 @@
                                            perc_black       = dm_mean(d_dm_race_black),
                                            perc_asian       = dm_mean(d_dm_race_asian),
                                            perc_amer_indian = dm_mean(d_dm_race_amer_indian),
+                                           perc_plang_ne    = dm_mean(plang_non_engl),
                                            perc_sped        = dm_mean(d_sped_y),
                                            perc_homeless    = dm_mean(d_homeless_y)),
                                     by = c("schoolname2010")]
@@ -164,8 +168,8 @@
 #===============================================#
   
   # set demo vars
-  demo_vars <- c("sex", "dm_race", "dm_hispanic", "sped", "homeless", "suyi_focus_students", "sch_type", "dm_grade", "schoolname2010")
-  acad_vars <- c("gpa_14", "daysenrolled", "daysabsent", "daysunexcused", "attendpercent", "fallmathrit_13", "wtrmathrit_14", "sprmathrit_14",
+  demo_vars <- c("sex", "dm_race", "dm_hispanic", "plang_non_engl", "sped", "homeless", "suyi_focus_students", "sch_type", "dm_grade", "schoolname2010")
+  acad_vars <- c("gpa_14", "daysenrolled", "daysabsent", "daysunexcused", "attendpercent", "fallmathrit_13", "wtrmathrit_14", "sprmathrit_14", 
                  "fallreadrit_13", "wtrreadrit_14", "sprreadrit_14", "z_msp_hspemathscore_14", "z_msp_hspereadscore_14")
   
   # subset to data for melt
@@ -176,7 +180,7 @@
   
   # melt data long to summarize
   student_data_long <- melt(student_set_melt, id.vars = c("dm_student_id", demo_vars))
-                              
+  
   # remove NA values
   student_data_long <- subset(student_data_long, !is.na(value))
   
@@ -288,11 +292,40 @@
   stacked_acad_stats_sg <- rbind(stacked_acad_stats_sg, a_acad_race, fill = TRUE)
   
   # reorder vars
-  ea_colorder(stacked_acad_stats_sg, c("type", "sex", "dm_race"))
+  ea_colorder(stacked_acad_stats_sg, c("type", "suyi_focus_students", "sex", "dm_race"))
   
   #remove: individual sets
   rm(student_data_long, a_acad_suyi, a_acad_gender, a_acad_race)
   
+#===========================================#
+# ==== summarize performance level vars ====
+#===========================================#
+
+  a_pl_math_overall <- ea_table(subset(student_set_working, is.na(dm_pl_math) == FALSE), "dm_pl_math", opt_percent = 1)
+  a_pl_read_overall <- ea_table(subset(student_set_working, is.na(dm_pl_read) == FALSE), "dm_pl_read", opt_percent = 1)
+  
+  a_pl_math_sch_type <- ea_table(subset(student_set_working, is.na(dm_pl_math) == FALSE), c("sch_type", "dm_pl_math"), opt_percent = 1, 
+                                 opt_var_per_by_group = "sch_type")
+  a_pl_read_sch_type <- ea_table(subset(student_set_working, is.na(dm_pl_read) == FALSE), c("sch_type", "dm_pl_read"), opt_percent = 1, 
+                                 opt_var_per_by_group = "sch_type")
+  
+  # add vars for stacking
+  a_pl_math_overall[,  type := "overall"]
+  a_pl_read_overall[,  type := "overall"]
+  a_pl_math_sch_type[, type := "sch_type"]
+  a_pl_read_sch_type[, type := "sch_type"]
+  
+  # stack together
+  stacked_pl_stats <- rbind(a_pl_math_overall, a_pl_read_overall, fill = TRUE)
+  stacked_pl_stats <- rbind(stacked_pl_stats, a_pl_math_sch_type, fill = TRUE)
+  stacked_pl_stats <- rbind(stacked_pl_stats, a_pl_read_sch_type, fill = TRUE)
+  
+  # reorder vars
+  ea_colorder(stacked_pl_stats, c("type", "sch_type", "dm_pl_math", "dm_pl_read"))
+  
+  #remove: individual sets
+  rm(a_pl_math_overall, a_pl_read_overall, a_pl_math_sch_type, a_pl_read_sch_type)
+
 #=================#
 # ==== export ====
 #=================#
@@ -305,6 +338,8 @@
     ea_write(stacked_demo_stats,    paste0(p_dir, "qc/summ_stats_demo.csv"))
     ea_write(stacked_acad_stats,    paste0(p_dir, "qc/summ_stats_acad.csv"))
     ea_write(stacked_acad_stats_sg, paste0(p_dir, "qc/summ_stats_acad_subgroup.csv"))
+    
+    ea_write(stacked_pl_stats, paste0(p_dir, "qc/summ_stats_msp_pl.csv"))
     
   }  
     
