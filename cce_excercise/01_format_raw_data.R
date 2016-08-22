@@ -62,9 +62,9 @@
   setnames(student_data_set, yr_vars_13, paste0(gsub("2013", "", yr_vars_13), "_13"))
   setnames(student_data_set, yr_vars_14, paste0(gsub("2014", "", yr_vars_14), "_14"))
 
-#============================================#
-# ==== convert demographic vars to dummy ====
-#============================================#
+#==================================#
+# ==== format demographic vars ====
+#==================================#
   
   # rename homeless var to dummy
   setnames(student_data_set, c("ishomeless"), c("homeless"))
@@ -89,6 +89,10 @@
                            nomatch = 0) != FALSE, dm_race := "asian"]
   student_data_set[chmatch(dm_race, c("alaska native", "other american indian"), nomatch = 0) != FALSE, dm_race := "amer_indian"]
 
+  # create non-english speaking vars
+  student_data_set[, plang_non_engl := ifelse(is.na(primarylanguage) | primarylanguage == "English", 0, 1)]
+  student_data_set[, hlang_non_engl := ifelse(is.na(homelanguage) | homelanguage == "English", 0, 1)]
+  
 #============================================#
 # ==== create grade and school type vars ====
 #============================================#
@@ -204,8 +208,8 @@
 #=======================#
   
   # reorder vars
-  ea_colorder(student_data_zscore, c("model_descr", "dm_student_id", "sex", "dm_race", "dm_hispanic", "sped", "homeless", "suyi_focus_students",
-                                     "sch_type", "dm_grade", "schoolname2010"))
+  ea_colorder(student_data_zscore, c("model_descr", "dm_student_id", "sex", "dm_race", "dm_hispanic", "sped", "homeless", "suyi_focus_students", 
+                                     "plang_non_engl", "sch_type", "dm_grade", "schoolname2010"))
   
 #=================#
 # ==== export ====
@@ -223,7 +227,7 @@
     
     # output dummy and zscore stats
     ea_write(out_dummy_vars$out_dummy_freqs, paste0(p_dir, "qc/freq_dummy_vars.csv"))
-    ea_write(out_stacked_zcore$out_data_zparms, paste0(p_dir, "qc/zscore_parameters.csv"))
+    ea_write(out_stacked_zcore$out_data_zparms, paste0(p_dir, "qc/zscore_parms.csv"))
     
   }
 
