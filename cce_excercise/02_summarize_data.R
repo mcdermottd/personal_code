@@ -101,6 +101,7 @@
                                                perc_black       = dm_mean(d_dm_race_black),
                                                perc_asian       = dm_mean(d_dm_race_asian),
                                                perc_amer_indian = dm_mean(d_dm_race_amer_indian),
+                                               perc_ell         = dm_mean(d_ell_y),
                                                perc_plang_ne    = dm_mean(plang_non_engl),
                                                perc_sped        = dm_mean(d_sped_y),
                                                perc_homeless    = dm_mean(d_homeless_y))]
@@ -113,6 +114,7 @@
                                            perc_black       = dm_mean(d_dm_race_black),
                                            perc_asian       = dm_mean(d_dm_race_asian),
                                            perc_amer_indian = dm_mean(d_dm_race_amer_indian),
+                                           perc_ell         = dm_mean(d_ell_y),
                                            perc_plang_ne    = dm_mean(plang_non_engl),
                                            perc_sped        = dm_mean(d_sped_y),
                                            perc_homeless    = dm_mean(d_homeless_y)),
@@ -127,6 +129,7 @@
                                                 perc_black       = dm_mean(d_dm_race_black),
                                                 perc_asian       = dm_mean(d_dm_race_asian),
                                                 perc_amer_indian = dm_mean(d_dm_race_amer_indian),
+                                                perc_ell         = dm_mean(d_ell_y),
                                                 perc_plang_ne    = dm_mean(plang_non_engl),
                                                 perc_sped        = dm_mean(d_sped_y),
                                                 perc_homeless    = dm_mean(d_homeless_y)),
@@ -141,6 +144,7 @@
                                            perc_black       = dm_mean(d_dm_race_black),
                                            perc_asian       = dm_mean(d_dm_race_asian),
                                            perc_amer_indian = dm_mean(d_dm_race_amer_indian),
+                                           perc_ell         = dm_mean(d_ell_y),
                                            perc_plang_ne    = dm_mean(plang_non_engl),
                                            perc_sped        = dm_mean(d_sped_y),
                                            perc_homeless    = dm_mean(d_homeless_y)),
@@ -168,9 +172,10 @@
 #===============================================#
   
   # set demo vars
-  demo_vars <- c("sex", "dm_race", "dm_hispanic", "plang_non_engl", "sped", "homeless", "suyi_focus_students", "sch_type", "dm_grade", "schoolname2010")
-  acad_vars <- c("gpa_14", "daysenrolled", "daysabsent", "daysunexcused", "attendpercent", "fallmathrit_13", "wtrmathrit_14", "sprmathrit_14", 
-                 "fallreadrit_13", "wtrreadrit_14", "sprreadrit_14", "z_msp_hspemathscore_14", "z_msp_hspereadscore_14")
+  demo_vars <- c("sex", "dm_race", "dm_hispanic", "plang_non_engl", "sped", "homeless", "suyi_focus_students", "sch_type", "dm_grade", 
+                 "schoolname2010")
+  acad_vars <- c("gpa_14", "attendpercent", "unexcused_rate", "fallmathrit_13", "wtrmathrit_14", "sprmathrit_14", "fallreadrit_13", "wtrreadrit_14",
+                 "sprreadrit_14", "z_msp_hspemathscore_14", "z_msp_hspereadscore_14")
   
   # subset to data for melt
   student_set_melt <- subset(student_set_working, select = c("dm_student_id", demo_vars, acad_vars)) 
