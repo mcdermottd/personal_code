@@ -27,7 +27,7 @@
   # set directory
   p_dir <- "C:/Users/Drew/Dropbox/analysis_data/cce_excercise/"
 
-  # define mean function (sig. digits)
+  # define mean function (sig. digits to round to)
   dm_mean <- function(x_var) { round(mean(x_var), 3) }
   
   # output toggle
@@ -49,6 +49,44 @@
   
   # convert necessary vars to numeric
   student_set_working[, c("suyi_focus_students")] <- lapply(student_set_working[, c("suyi_focus_students"), with = FALSE], as.numeric)
+
+#===========================================#
+# ==== summarize school characteristics ====
+#===========================================#
+  
+  # take frequency of students by school
+  a_freq_sch <- ea_table(student_set_working, c("schoolname2010"), opt_percent = 1)
+
+  # summarize students per school
+  a_sch_students <- a_freq_sch[, list(n_schools    = .N,
+                                      avg_students = dm_mean(count),
+                                      med_students = quantile(count, .5),
+                                      min_students = min(count),
+                                      max_students = max(count))]
+  
+  # take frequency of students by school and type
+  a_freq_sch_type <- ea_table(student_set_working, c("sch_type", "schoolname2010"))
+  
+  # summarize students per school type
+  a_sch_students_type <- a_freq_sch_type[, list(n_schools    = .N,
+                                                avg_students = dm_mean(count),
+                                                med_students = quantile(count, .5),
+                                                min_students = min(count),
+                                                max_students = max(count)),
+                                         by = "sch_type"]
+                                        
+  # add vars for stacking
+  a_sch_students[,      type := "overall"]
+  a_sch_students_type[, type := "sch_type"]
+
+  # stack together
+  stacked_sch_cts <- rbind(a_sch_students, a_sch_students_type, fill = TRUE)
+
+  # reorder vars
+  ea_colorder(stacked_sch_cts, c("type", "sch_type"))
+  
+  #remove: sets needed for summaries
+  rm(a_freq_sch, a_sch_students, a_freq_sch_type, a_sch_students_type)
   
 #=====================================#
 # ==== summarize demographic vars ====
@@ -110,7 +148,7 @@
   a_demo_grd[,      type := "grade"]
   a_demo_sch[,      type := "school"]
 
-    # stack together
+  # stack together
   stacked_demo_stats <- rbind(a_demo_overall,     a_demo_sch_type, fill = TRUE)
   stacked_demo_stats <- rbind(stacked_demo_stats, a_demo_grd, fill = TRUE)
   stacked_demo_stats <- rbind(stacked_demo_stats, a_demo_sch, fill = TRUE)
@@ -148,38 +186,38 @@
   
   # summarize acad vars - overall
   a_acad_overall <- student_data_long[, list(n_obs = length(value),
-                                             mean = dm_mean(value),
-                                             var = round(var(value), 3),
-                                             sd = round(sd(value), 3),
-                                             min = min(value),
-                                             q25 = quantile(value, .25),
-                                             q50 = quantile(value, .5),
-                                             q75 = quantile(value, .75),
-                                             max = max(value)), 
+                                             mean  = dm_mean(value),
+                                             med   = quantile(value, .5),
+                                             var   = round(var(value), 3),
+                                             sd    = round(sd(value), 3),
+                                             min   = min(value),
+                                             q25   = quantile(value, .25),
+                                             q75   = quantile(value, .75),
+                                             max   = max(value)), 
                                       by = variable]
 
   # summarize acad vars - by school type
   a_acad_sch_type <- student_data_long[, list(n_obs = length(value),
-                                              mean = dm_mean(value),
-                                              var = round(var(value), 3),
-                                              sd = round(sd(value), 3),
-                                              min = min(value),
-                                              q25 = quantile(value, .25),
-                                              q50 = quantile(value, .5),
-                                              q75 = quantile(value, .75),
-                                              max = max(value)), 
+                                              mean  = dm_mean(value),
+                                              med   = quantile(value, .5),
+                                              var   = round(var(value), 3),
+                                              sd    = round(sd(value), 3),
+                                              min   = min(value),
+                                              q25   = quantile(value, .25),
+                                              q75   = quantile(value, .75),
+                                              max   = max(value)), 
                                        by = c("variable", "sch_type")]
   
   # summarize acad vars - by grade
   a_acad_grd <- student_data_long[, list(n_obs = length(value),
-                                         mean = dm_mean(value),
-                                         var = round(var(value), 3),
-                                         sd = round(sd(value), 3),
-                                         min = min(value),
-                                         q25 = quantile(value, .25),
-                                         q50 = quantile(value, .5),
-                                         q75 = quantile(value, .75),
-                                         max = max(value)), 
+                                         mean  = dm_mean(value),
+                                         med   = quantile(value, .5),
+                                         var   = round(var(value), 3),
+                                         sd    = round(sd(value), 3),
+                                         min   = min(value),
+                                         q25   = quantile(value, .25),
+                                         q75   = quantile(value, .75),
+                                         max   = max(value)), 
                                   by = c("variable", "dm_grade")]
   
   # add vars for stacking
@@ -195,8 +233,66 @@
   ea_colorder(stacked_acad_stats, c("type", "sch_type", "dm_grade"))
   
   #remove: individual sets
-  rm(student_set_melt, student_data_long, a_acad_overall, a_acad_sch_type, a_acad_grd)
+  rm(student_set_melt, a_acad_overall, a_acad_sch_type, a_acad_grd)
+  
+#============================================#
+# ==== summarize acad. vars by subgroups ====
+#============================================#
 
+  # summarize acad vars - by suyi focus student status
+  a_acad_suyi <- student_data_long[, list(n_obs = length(value),
+                                          mean  = dm_mean(value),
+                                          med   = quantile(value, .5),
+                                          var   = round(var(value), 3),
+                                          sd    = round(sd(value), 3),
+                                          min   = min(value),
+                                          q25   = quantile(value, .25),
+                                          q50   = quantile(value, .5),
+                                          q75   = quantile(value, .75),
+                                          max   = max(value)), 
+                                   by = c("variable", "suyi_focus_students")]
+  
+  # summarize acad vars - by gender
+  a_acad_gender <- student_data_long[, list(n_obs = length(value),
+                                            mean  = dm_mean(value),
+                                            med   = quantile(value, .5),
+                                            var   = round(var(value), 3),
+                                            sd    = round(sd(value), 3),
+                                            min   = min(value),
+                                            q25   = quantile(value, .25),
+                                            q50   = quantile(value, .5),
+                                            q75   = quantile(value, .75),
+                                            max   = max(value)), 
+                                   by = c("variable", "sex")]
+  
+  # summarize acad vars - by race
+  a_acad_race <- student_data_long[, list(n_obs = length(value),
+                                          mean  = dm_mean(value),
+                                          med   = quantile(value, .5),
+                                          var   = round(var(value), 3),
+                                          sd    = round(sd(value), 3),
+                                          min   = min(value),
+                                          q25   = quantile(value, .25),
+                                          q50   = quantile(value, .5),
+                                          q75   = quantile(value, .75),
+                                          max   = max(value)),  
+                                   by = c("variable", "dm_race")]
+  
+  # add vars for stacking
+  a_acad_suyi[,   type := "suyi_status"]
+  a_acad_gender[, type := "gender"]
+  a_acad_race[,   type := "race"]
+
+  # stack together
+  stacked_acad_stats_sg <- rbind(a_acad_suyi,           a_acad_gender, fill = TRUE)
+  stacked_acad_stats_sg <- rbind(stacked_acad_stats_sg, a_acad_race, fill = TRUE)
+  
+  # reorder vars
+  ea_colorder(stacked_acad_stats_sg, c("type", "sex", "dm_race"))
+  
+  #remove: individual sets
+  rm(student_data_long, a_acad_suyi, a_acad_gender, a_acad_race)
+  
 #=================#
 # ==== export ====
 #=================#
@@ -205,8 +301,10 @@
   if (p_opt_exp == 1) { 
     
     # output stacked sets
-    ea_write(stacked_demo_stats, paste0(p_dir, "qc/summ_demo_stacked.csv"))
-    ea_write(stacked_acad_stats, paste0(p_dir, "qc/summ_acad_stacked.csv"))
+    ea_write(stacked_sch_cts,       paste0(p_dir, "qc/summ_sch_counts.csv"))
+    ea_write(stacked_demo_stats,    paste0(p_dir, "qc/summ_stats_demo.csv"))
+    ea_write(stacked_acad_stats,    paste0(p_dir, "qc/summ_stats_acad.csv"))
+    ea_write(stacked_acad_stats_sg, paste0(p_dir, "qc/summ_stats_acad_subgroup.csv"))
     
   }  
     
