@@ -18,7 +18,6 @@
   # load packages
   library(readxl)
   library(data.table)
-  library(eaanalysis)
 
 #====================#
 # ==== set parms ====
@@ -27,7 +26,7 @@
   # store timestamp
   p_timestamp  <- ea_timestamp()
   
-  # set project folder (under should be data, documents, results, qc)
+  # set project folder
   p_dir_root <- "C:/Users/Drew/Dropbox/analysis_data/eos_excercise/"
   
   # set output directories
