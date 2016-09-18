@@ -171,7 +171,7 @@
 #===============================================#
   
   # set demo vars
-  demo_vars <- c("sex", "dm_race", "dm_hispanic", "plang_non_engl", "sped", "homeless", "suyi_focus_students", "sch_type", "dm_grade", 
+  demo_vars <- c("sex", "dm_race", "dm_hispanic", "plang_non_engl", "sped", "homeless", "d_ell_y", "suyi_focus_students", "sch_type", "dm_grade", 
                  "schoolname2010")
   acad_vars <- c("gpa_14", "attendpercent", "unexcused_rate", "fallmathrit_13", "wtrmathrit_14", "sprmathrit_14", "fallreadrit_13", "wtrreadrit_14",
                  "sprreadrit_14", "z_msp_hspemathscore_14", "z_msp_hspereadscore_14")
@@ -286,6 +286,19 @@
                                           max   = max(value)),  
                                    by = c("variable", "dm_race")]
   
+  # summarize acad vars - by ell status
+  a_acad_ell <- student_data_long[, list(n_obs = length(value),
+                                          mean  = dm_mean(value),
+                                          med   = quantile(value, .5),
+                                          var   = round(var(value), 3),
+                                          sd    = round(sd(value), 3),
+                                          min   = min(value),
+                                          q25   = quantile(value, .25),
+                                          q50   = quantile(value, .5),
+                                          q75   = quantile(value, .75),
+                                          max   = max(value)),  
+                                   by = c("variable", "d_ell_y")]
+  
   # add vars for stacking
   a_acad_suyi[,   type := "suyi_status"]
   a_acad_gender[, type := "gender"]
@@ -313,19 +326,37 @@
   a_pl_read_sch_type <- ea_table(subset(student_set_working, is.na(dm_pl_read) == FALSE), c("sch_type", "dm_pl_read"), opt_percent = 1, 
                                  opt_var_per_by_group = "sch_type")
   
+  a_pl_math_suyi <- ea_table(subset(student_set_working, is.na(dm_pl_math) == FALSE), c("suyi_focus_students", "dm_pl_math"), opt_percent = 1,
+                             opt_var_per_by_group = "suyi_focus_students")
+  a_pl_read_suyi <- ea_table(subset(student_set_working, is.na(dm_pl_read) == FALSE), c("suyi_focus_students", "dm_pl_read"), opt_percent = 1,
+                             opt_var_per_by_group = "suyi_focus_students")
+  
+  a_pl_math_ell <- ea_table(subset(student_set_working, is.na(dm_pl_math) == FALSE), c("d_ell_y", "dm_pl_math"), opt_percent = 1,
+                             opt_var_per_by_group = "d_ell_y")
+  a_pl_read_ell <- ea_table(subset(student_set_working, is.na(dm_pl_read) == FALSE), c("d_ell_y", "dm_pl_read"), opt_percent = 1,
+                             opt_var_per_by_group = "d_ell_y")
+  
   # add vars for stacking
   a_pl_math_overall[,  type := "overall"]
   a_pl_read_overall[,  type := "overall"]
   a_pl_math_sch_type[, type := "sch_type"]
   a_pl_read_sch_type[, type := "sch_type"]
+  a_pl_math_suyi[, type := "suyi_status"]
+  a_pl_read_suyi[, type := "suyi_status"]
+  a_pl_math_ell[, type := "ell"]
+  a_pl_read_ell[, type := "ell"]
   
   # stack together
   stacked_pl_stats <- rbind(a_pl_math_overall, a_pl_read_overall, fill = TRUE)
   stacked_pl_stats <- rbind(stacked_pl_stats, a_pl_math_sch_type, fill = TRUE)
   stacked_pl_stats <- rbind(stacked_pl_stats, a_pl_read_sch_type, fill = TRUE)
-  
+  stacked_pl_stats <- rbind(stacked_pl_stats, a_pl_math_suyi, fill = TRUE)
+  stacked_pl_stats <- rbind(stacked_pl_stats, a_pl_read_suyi, fill = TRUE)
+  stacked_pl_stats <- rbind(stacked_pl_stats, a_pl_math_ell, fill = TRUE)
+  stacked_pl_stats <- rbind(stacked_pl_stats, a_pl_read_ell, fill = TRUE)
+
   # reorder vars
-  ea_colorder(stacked_pl_stats, c("type", "sch_type", "dm_pl_math", "dm_pl_read"))
+  ea_colorder(stacked_pl_stats, c("type", "sch_type", "suyi_focus_students", "d_ell_y", "dm_pl_math", "dm_pl_read"))
   
   #remove: individual sets
   rm(a_pl_math_overall, a_pl_read_overall, a_pl_math_sch_type, a_pl_read_sch_type)
