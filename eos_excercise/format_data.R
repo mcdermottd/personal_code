@@ -58,6 +58,23 @@
   setnames(eos_summ_data, gsub("%", "perc",    colnames(eos_summ_data)))
   setnames(eos_summ_data, gsub("/", "_",       colnames(eos_summ_data)))
   setnames(eos_summ_data, gsub("_\\(1,0)", "", colnames(eos_summ_data)))
+  
+#==========================================================================================================================#
+# ==== fix schools with data issues - negative value in num bm 13_14 variable (set includes 3 schools: 30, 31, and 80) ====
+#==========================================================================================================================#
+
+  # add negative bm students to totals
+  eos_summ_data[num_benchmark_students_added_over_baseline_13_14 < 0, total_students_added_to_ap_ib_over_baseline_13_14 := 
+                  total_students_added_to_ap_ib_over_baseline_13_14 - num_benchmark_students_added_over_baseline_13_14]
+  
+  # re-calculate percentages
+  eos_summ_data[num_benchmark_students_added_over_baseline_13_14 < 0, perc_underrep_students_added_to_ap_ib_over_baseline_13_14 := 
+                  num_underrep_students_added_to_ap_ib_over_baseline_13_14 / total_students_added_to_ap_ib_over_baseline_13_14]
+  eos_summ_data[num_benchmark_students_added_over_baseline_13_14 < 0, perc_benchmark_students_added_over_baseline_13_14 := 
+                  0 / total_students_added_to_ap_ib_over_baseline_13_14]
+    
+  # set negative value to 0 
+  eos_summ_data[num_benchmark_students_added_over_baseline_13_14 < 0, num_benchmark_students_added_over_baseline_13_14 := 0]
 
 #===============================#
 # ==== create long data set ====
