@@ -69,64 +69,69 @@
   # create percentage of schools var
   cl_gaps_start_yr_long[, percent := value / total_schs]
   cl_gaps_long[,          percent := value / total_schs]
+  
+  # cast students added variables wide, by year
+  wide_studs_added <- dcast(subset(eos_data, variable != "closed_gaps"), district_id + school_id + num_of_years_of_data + start_year_with_eos + 
+                              num_of_years_gaps_closed + num_of_ur_added_in_3_years + num_of_ur_added_across_district + data_yr ~ variable, 
+                            value.var = c("value"))
 
+  # set data year to character
+  wide_studs_added[, data_yr := as.character(data_yr)]
+  
 #========================================#
 # ==== plots - closed gaps (summary) ====
 #========================================#
   
   # plot - num schools closed gaps, by year
-  plot_gaps_yr <- ggplot(cl_gaps_long, aes(x = data_yr, y = value, fill = variable)) + 
-                    geom_bar(stat = "count", position = "identity")
+  plot_gaps_yr <- ggplot(data = cl_gaps_long, aes(x = data_yr, y = value, fill = variable)) + 
+                    geom_bar(stat = "identity", position = "identity")
   
   # plot - num schools closed gaps, by year, facetted by start year
-  plot_gaps_yr_start_yr <- ggplot(cl_gaps_start_yr_long, aes(x = data_yr, y = value, fill = variable)) + 
+  plot_gaps_yr_start_yr <- ggplot(data = cl_gaps_start_yr_long, aes(x = data_yr, y = value, fill = variable)) + 
                             geom_bar(stat = "identity", position = "identity") + 
                             facet_wrap("start_year_with_eos")
   
   # plot - perc schools closed gaps, by year
-  plot_perc_gaps_yr <- ggplot(cl_gaps_long, aes(x = data_yr, y = percent, fill = variable)) + 
+  plot_perc_gaps_yr <- ggplot(data = cl_gaps_long, aes(x = data_yr, y = percent, fill = variable)) + 
                           geom_bar(stat = "identity", position = "identity")
   
   # plot - perc schools closed gaps, by year
-  plot_perc_gaps_yr_start_yr <- ggplot(cl_gaps_start_yr_long, aes(x = data_yr, y = percent, fill = variable)) + 
+  plot_perc_gaps_yr_start_yr <- ggplot(data = cl_gaps_start_yr_long, aes(x = data_yr, y = percent, fill = variable)) + 
                                   geom_bar(stat = "identity", position = "identity") +
                                   facet_wrap("start_year_with_eos")
 
-#===============================#
-# ==== plots - school-level ====
-#===============================# 
+#===============================================================#
+# ==== plots - distribution of percentage of students added ====
+#===============================================================#
   
-  eos_data
-  # plot - scatter of schools by ur/bm students added
-  plot_gaps_yr <- ggplot(cl_gaps_long, aes(x = data_yr, y = value, fill = variable)) + 
-                    geom_bar(stat = "count", position = "identity")
+  # plot - histogram of percent of ur students added (total students added > 20) 
+  plot_hist_ur_added <- ggplot(data = subset(wide_studs_added, num_ap_students_added > 20), aes(x = perc_ap_ur_students_added)) + 
+                          geom_histogram() 
   
+  # plot - box and whisker of percent of ur students added (total students added > 20) 
+  plot_box_ur_added <- ggplot(data = subset(wide_studs_added, num_ap_students_added > 20), aes(x = data_yr, y = perc_ap_ur_students_added)) + 
+                        geom_boxplot() +
+                        stat_summary(fun.y = mean, geom = "point", shape = 5, size = 3)
   
-  
-  
-  p <- ggplot(subset(eos_data, variable == "closed_gaps"), aes(x = data_yr)) +  
-        geom_bar(aes(y = ..count..))
-  
-  plot_closed_gaps <- ggplot(data = a_tot_closed_gaps, aes(x = data_yr, y = total_schs)) 
+#=============================================#
+# ==== plots - school-level scatter plots ====
+#=============================================#
 
+  # plot - scatter of schools, students added by perc ur students added (total students added > 20)
+  plot_scatter_ur_added <- ggplot(data = subset(wide_studs_added, num_ap_students_added > 20), 
+                                  aes(x = num_ap_students_added, y = perc_ap_ur_students_added)) + 
+                            geom_point()
   
-  # histogram 
-  plot_hist_closed_gaps <- ggplot(data = subset(eos_data, variable == "closed_gaps"), aes(x = data_yr, y = sum(value))) 
+  # plot - scatter of schools, students added by perc bm students added (total students added > 20)
+  plot_scatter_bm_added <- ggplot(data = subset(wide_studs_added, num_ap_students_added > 20), 
+                                  aes(x = num_ap_students_added, y = perc_ap_bm_students_added)) + 
+                            geom_point()
   
-  
-  + 
-                                 geom_histogram(binwidth = 15, colour = "black", fill = "dodgerblue4") 
-
-  
-  ggplot(data=dat1, aes(x = time, y = total_bill, fill = sex)) +
-    geom_bar(stat="identity", position=position_dodge())
   
   # line graph
   
   
   # box and whisker plot - percentage of ap ur students
-  
-  # scatter plot - percentage of ap ur students above baseline by percentage of bm students above baseline (point for each school)
   
   # does multiply years of EOS participation matter - increase percentage of ap ur students above baseline (is baseline reset every year?)
 #=================#
