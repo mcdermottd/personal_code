@@ -51,32 +51,48 @@
   eos_data <- copy(in_eos_data_long)
   
   # calculate total number of schs that closed gaps, by year
-  a_tot_closed_gaps <- eos_data[variable == "closed_gaps", list(total_schs  = .N,
-                                                                closed_gaps = sum(value)),
-                                by = data_yr]
+  a_cl_gaps_start_yr <- eos_data[variable == "closed_gaps", list(total_schs  = .N,
+                                                                 closed_gaps = sum(value)),
+                                 by = c("start_year_with_eos", "data_yr")]
   
   # create variable for schools that didn't close gaps
-  a_tot_closed_gaps[, not_closed_gaps := closed_gaps - total_schs]
+  a_cl_gaps_start_yr[, not_closed_gaps := closed_gaps - total_schs]
   
   # melt closed and not closed vars long
-  tot_gaps_long <- melt(a_tot_closed_gaps, measure.vars = c("closed_gaps", "not_closed_gaps"))
+  cl_gaps_start_yr_long <- melt(a_cl_gaps_start_yr, measure.vars = c("closed_gaps", "not_closed_gaps"))
+  
+  # sum by data_yr
+  cl_gaps_long <- cl_gaps_start_yr_long[, list(total_schs = sum(total_schs),
+                                               value      = sum(value)),
+                                        by = c("data_yr", "variable")]
   
   # create percentage of schools var
-  tot_gaps_long[, percent := value / total_schs]
-  
+  cl_gaps_start_yr_long[, percent := value / total_schs]
+  cl_gaps_long[,          percent := value / total_schs]
+
 #=======================#
 # ==== create plots ====
 #=======================#
   
   # plot - num schools closed gaps, by year
-  plot_gaps_yr <- ggplot(tot_gaps_long, aes(x = data_yr, y = value, fill = variable)) + 
+  plot_gaps_yr <- ggplot(cl_gaps_long, aes(x = data_yr, y = value, fill = variable)) + 
+                    geom_bar(stat = "count", position = "identity")
+  
+  # plot - num schools closed gaps, by year, facetted by start year
+  plot_gaps_yr_start_yr <- ggplot(cl_gaps_start_yr_long, aes(x = data_yr, y = value, fill = variable)) + 
+                            geom_bar(stat = "identity", position = "identity") + 
+                            facet_wrap("start_year_with_eos")
+  
+  # plot - perc schools closed gaps, by year
+  plot_perc_gaps_yr <- ggplot(cl_gaps_long, aes(x = data_yr, y = percent, fill = variable)) + 
                           geom_bar(stat = "identity", position = "identity")
   
   # plot - perc schools closed gaps, by year
-  plot_perc_gaps_yr <- ggplot(tot_gaps_long, aes(x = data_yr, y = percent, fill = variable)) + 
-                          geom_bar(stat = "identity", position = "identity")
-  
+  plot_perc_gaps_yr_start_yr <- ggplot(cl_gaps_start_yr_long, aes(x = data_yr, y = percent, fill = variable)) + 
+                                  geom_bar(stat = "identity", position = "identity") +
+                                  facet_wrap("start_year_with_eos")
 
+           
   
   
   
