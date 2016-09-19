@@ -1,0 +1,88 @@
+---
+title: "Untitled"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: rows
+    vertical_layout: fill
+---
+
+```{r setup, include = FALSE}
+
+#==============================================#
+# ==== load packages and clear objects/log ====
+#==============================================#
+
+  # load easimple and clear objects log
+  library(easimple)
+  ea_start()
+  
+  library(flexdashboard)
+  library(ggplot2)
+  library(data.table)
+
+#====================#
+# ==== set parms ====
+#====================#
+  
+  # set project folder
+  p_dir_root <- "C:/Users/Drew/Dropbox/analysis_data/eos_excercise/data/most_recent/"
+
+#====================#
+# ==== load data ====
+#====================#
+  
+  # load data for plotting
+  cl_gaps_overall  <- ea_load(paste0(p_dir_root, "cl_gaps_overall.rdata"))
+  cl_gaps_start_yr <- ea_load(paste0(p_dir_root, "cl_gaps_start_yr.rdata"))
+  studs_added_wide <- ea_load(paste0(p_dir_root, "students_added_wide_data.rdata"))
+
+```
+
+Row
+-----------------------------------------------------------------------
+
+### Chart A
+
+```{r, fig.width = 10, fig.height = 7}
+  
+  # plot - num schools closed gaps, by year
+  ggplot(data = cl_gaps_overall, aes(x = data_yr, y = value, fill = variable)) + 
+    geom_bar(stat = "identity", position = "identity")
+
+```
+
+### Chart B
+
+```{r, fig.width = 10, fig.height = 7}
+  
+  # plot - num schools closed gaps, by year, facetted by start year
+  ggplot(data = cl_gaps_start_yr, aes(x = data_yr, y = value, fill = variable)) + 
+                            geom_bar(stat = "identity", position = "identity") + 
+                            facet_wrap("start_year_with_eos")
+
+```
+
+Row
+-----------------------------------------------------------------------
+
+### Chart C
+
+```{r, fig.width = 10, fig.height = 7}
+  
+  # plot - perc schools closed gaps, by year
+  ggplot(data = cl_gaps_overall, aes(x = data_yr, y = percent, fill = variable)) + 
+                          geom_bar(stat = "identity", position = "identity")
+
+```
+
+### Chart D
+
+```{r, fig.width = 10, fig.height = 7}
+
+  # plot - perc schools closed gaps, by year, facetted by start year
+  ggplot(data = cl_gaps_start_yr, aes(x = data_yr, y = percent, fill = variable)) + 
+                                  geom_bar(stat = "identity", position = "identity") +
+                                  facet_wrap("start_year_with_eos")
+
+```
+
