@@ -7,7 +7,7 @@ runtime: shiny
 
 ---
 
-```{r setup, include = FALSE}
+```{r global, include = FALSE}
 
 #==============================================#
 # ==== load packages and clear objects/log ====
@@ -157,70 +157,112 @@ Column {.tabset .tabset-fade}
 
 ```
 
-<!-- Underrepresented Students Added (Page 2) {data-orientation=columns} -->
-<!-- ===================================== -->
+Underrepresented Students Added (Page 2) {data-orientation=columns}
+=====================================
 
-<!-- Column -->
-<!-- ----------------------------------------------------------------------- -->
+Inputs {.sidebar}
+-----------------------------------------------------------------------
 
-<!-- ### Chart 2A - Distribution of Percentage of Underrepresented Students Added to AP/IB Overal Baseline -->
+```{r}
 
-<!-- ```{r, fig.width = 10, fig.height = 7} -->
+  # define selection tab
+  checkboxGroupInput(inputId = "selected_cohort", 
+                     label = h3("EOS Start Year (FY):"),
+                     choices = c("FY13-FY14", "FY14-FY15", "FY15-FY16"),
+                     selected = c("FY13-FY14", "FY14-FY15", "FY15-FY16"))
+
+  # define selection tab
+  checkboxGroupInput(inputId ="selected_yr", 
+                     label = h3("Data Year (FY):"),
+                     choices = c("2014", "2015", "2016"),
+                     selected = "2014")
+  
+  
+  # Combine the selected variables into a new data frame
+  selected_data <- reactive({ output <- subset(studs_added_wide, num_ap_students_added > 20 & 
+                                                       chmatch(start_year_with_eos, c(input$selected_cohort), nomatch = 0) != 0 & 
+                                                       chmatch(data_yr, c(input$selected_yr), nomatch = 0) != 0) })
+
+```
+
+Column
+-----------------------------------------------------------------------
+
+### Chart 2A - Distribution of Percentage of Underrepresented Students Added to AP/IB Overal Baseline, by Fiscal Year
+
+```{r}
 
 
-<!--   # plot - histogram of percent of ur students added (total students added > 20) -->
-<!--   ggplot(data = subset(studs_added_wide, num_ap_students_added > 20), aes(x = perc_ap_ur_students_added)) + -->
-<!--     geom_histogram() -->
+  # plot - box and whisker of percent of ur students added (total students added > 20)
+  ggplot(data = subset(studs_added_wide, num_ap_students_added > 20), aes(x = data_yr, y = perc_ap_ur_students_added)) +
+    geom_boxplot(colour         = "black", 
+                 fill           = "#3B9AB2",
+                 outlier.colour = "#F21A00") +
+    stat_summary(fun.y = mean, 
+                 geom  = "point", 
+                 shape = 5, size = 3) +
+    labs(x = "Year (FY)", 
+         y = "Percent of Underrepresented 
+Students Added to AP/IB 
+Over Baseline") +
+    plot_attributes
 
-<!-- ``` -->
+```
 
-<!-- Column -->
-<!-- ----------------------------------------------------------------------- -->
+### Chart 2B - Distribution of Percentage of Underrepresented Students Added to AP/IB Overal Baseline
 
-<!-- ### Chart 2A - Distribution of Percentage of Underrepresented Students Added to AP/IB Overal Baseline, by Fiscal Year -->
+```{r}
 
-<!-- ```{r, fig.width = 10, fig.height = 7} -->
+  # # Combine the selected variables into a new data frame
+  # selected_data <- reactive({ output <- subset(studs_added_wide, num_ap_students_added > 20 & 
+  #                                                      chmatch(start_year_with_eos, c(input$selected_cohort), nomatch = 0) != 0 & 
+  #                                                      chmatch(data_yr, c(input$selected_yr), nomatch = 0) != 0) })
 
+  renderPlot({
 
-<!--   # plot - box and whisker of percent of ur students added (total students added > 20) -->
-<!--   ggplot(data = subset(studs_added_wide, num_ap_students_added > 20), aes(x = data_yr, y = perc_ap_ur_students_added)) + -->
-<!--     geom_boxplot() + -->
-<!--     stat_summary(fun.y = mean, geom = "point", shape = 5, size = 3) -->
+  # plot - histogram of percent of ur students added (total students added > 20)
+  ggplot(data = selected_data(), aes(x = perc_ap_ur_students_added)) +
+    geom_histogram(binwidth = .05,
+                   colour   = "black", fill = "#3B9AB2") +
+    labs(x = "Percent of Underrepresented Students Added to AP/IB Over Baseline", y = "Number of Schools") +
+    plot_attributes
+    
+  })
 
-<!-- ``` -->
+```
 
-<!-- Percentage of Underrepresented Students Added by School (Page 3) {data-orientation=columns} -->
-<!-- ===================================== -->
+Percentage of Underrepresented Students Added by School (Page 3) {data-orientation=columns}
+=====================================
 
-<!-- Column {.sidebar} -->
-<!-- ----------------------------------------------------------------------- -->
+Column {.sidebar}
+-----------------------------------------------------------------------
 
-<!-- Select the fiscal year (FY) to display in the chart to the right -->
+Select the fiscal year (FY) to display in the chart to the right
 
-<!-- ```{r} -->
+```{r}
 
-<!--   # define selection tab -->
-<!--   selectInput("selected_yr", label = "Data Year:", -->
-<!--               choices = c("2014", "2015", "2016"), selected = "2014", multiple = TRUE) -->
+  # define selection tab
+  selectInput("selected_yr", label = "Data Year:",
+              choices = c("2014", "2015", "2016"), selected = "2014", multiple = TRUE)
 
-<!-- ``` -->
+```
 
-<!-- Column -->
-<!-- ----------------------------------------------------------------------- -->
+Column
+-----------------------------------------------------------------------
 
-<!-- ### Chart 3a -->
+### Chart 3a
 
-<!-- ```{r} -->
+```{r}
 
-<!--   # Combine the selected variables into a new data frame -->
-<!--   selected_data <- reactive({ subset(studs_added_wide, num_ap_students_added > 20 & chmatch(data_yr, c(input$selected_yr), nomatch = 0) != 0) }) -->
+  # Combine the selected variables into a new data frame
+  selected_data <- reactive({ subset(studs_added_wide, num_ap_students_added > 20 & chmatch(data_yr, c(input$selected_yr), nomatch = 0) != 0) })
 
-<!--   renderPlot({ -->
+  renderPlot({
 
-<!--       ggplot(data = selected_data(), aes(x = num_ap_students_added, y = perc_ap_ur_students_added)) + -->
-<!--         geom_point() -->
+      ggplot(data = selected_data(), aes(x = num_ap_students_added, y = perc_ap_ur_students_added)) +
+        geom_point()
 
-<!--   }) -->
+  })
 
-<!-- ``` -->
+```
 

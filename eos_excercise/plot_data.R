@@ -118,7 +118,8 @@
                           scale_fill_manual(values = c("#3B9AB2", "#F21A00"), 
                                             labels = c("Closed Gaps", "Did Not Close Gaps")) +
                           theme(legend.title = element_blank()) +
-                          labs(x = "Year (FY)", y = "Number of Schools") +
+                          labs(x = "Year (FY)", 
+                               y = "Number of Schools") +
                           plot_attributes
   
   # plot - num schools closed gaps, by year, facetted by start year (Chart 1C)
@@ -131,7 +132,8 @@
                             scale_fill_manual(values = c("#3B9AB2", "#F21A00"), 
                                               labels = c("Closed Gaps", "Did Not Close Gaps")) +
                             theme(legend.title = element_blank()) +
-                            labs(x = "Year (FY)", y = "Number of Schools") +
+                            labs(x = "Year (FY)", 
+                                 y = "Number of Schools") +
                             plot_attributes
   
   # plot - perc schools closed gaps, by year, facetted by start year (Chart 1D)
@@ -142,21 +144,34 @@
                                   scale_fill_manual(values = c("#3B9AB2", "#F21A00"), 
                                                     labels = c("Closed Gaps", "Did Not Close Gaps")) +
                                   theme(legend.title = element_blank()) +
-                                  labs(x = "Year (FY)", y = "Number of Schools") +
+                                  labs(x = "Year (FY)", 
+                                       y = "Number of Schools") +
                                   plot_attributes
 
 #===============================================================#
 # ==== plots - distribution of percentage of students added ====
 #===============================================================#
   
+  # plot - box and whisker of percent of ur students added (total students added > 20) (Chart 2A)
+  plot_box_ur_added <- ggplot(data = subset(studs_added_wide, num_ap_students_added > 20), aes(x = data_yr, y = perc_ap_ur_students_added)) + 
+                        geom_boxplot(colour         = "black", 
+                                     fill           = "#3B9AB2",
+                                     outlier.colour = "#F21A00") +
+                        stat_summary(fun.y = mean, 
+                                     geom  = "point", 
+                                     shape = 5, size = 3) +
+                        labs(x = "Year (FY)", 
+                             y = "Percent of Underrepresented Students Added to AP/IB Over Baseline") +
+                        plot_attributes
+  
   # plot - histogram of percent of ur students added (total students added > 20) 
   plot_hist_ur_added <- ggplot(data = subset(studs_added_wide, num_ap_students_added > 20), aes(x = perc_ap_ur_students_added)) + 
-                          geom_histogram() 
-  
-  # plot - box and whisker of percent of ur students added (total students added > 20) 
-  plot_box_ur_added <- ggplot(data = subset(studs_added_wide, num_ap_students_added > 20), aes(x = data_yr, y = perc_ap_ur_students_added)) + 
-                        geom_boxplot() +
-                        stat_summary(fun.y = mean, geom = "point", shape = 5, size = 3)
+                          geom_histogram(binwidth = .05,
+                                         colour   = "black", 
+                                         fill     = "#3B9AB2") +
+                          labs(x = "Percent of Underrepresented Students Added to AP/IB Over Baseline", 
+                               y = "Number of Schools") +
+                          plot_attributes
   
 #=============================================#
 # ==== plots - school-level scatter plots ====
