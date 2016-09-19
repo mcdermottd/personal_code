@@ -1,9 +1,10 @@
 ---
-title: "Untitled"
-output: 
+title:   "EOS Student Comparison Metrics - FY 13-14 to FY 15-16"
+output:  
   flexdashboard::flex_dashboard:
-    orientation: rows
-    vertical_layout: fill
+  source_code: embed
+runtime: shiny
+
 ---
 
 ```{r setup, include = FALSE}
@@ -38,10 +39,13 @@ output:
 
 ```
 
-Row
+Closing Gaps (Page 1) {data-orientation=columns}
+=====================================  
+
+Column
 -----------------------------------------------------------------------
 
-### Chart A
+### Chart 1A - Gaps Closed between Underrepresented and Benchmark Students - Number of Schools
 
 ```{r, fig.width = 10, fig.height = 7}
   
@@ -51,9 +55,23 @@ Row
 
 ```
 
-### Chart B
+### Chart 1B - Gaps Closed between Underrepresented and Benchmark Students - Percentage of Schools
 
 ```{r, fig.width = 10, fig.height = 7}
+  
+  # plot - perc schools closed gaps, by year
+  ggplot(data = cl_gaps_overall, aes(x = data_yr, y = percent, fill = variable)) + 
+                          geom_bar(stat = "identity", position = "identity")
+
+
+```
+
+Column {.tabset .tabset-fade}
+-----------------------------------------------------------------------
+
+### Chart 1C - Number of Schools by EOS Start Year
+
+```{r, fig.width = 15, fig.height = 11}
   
   # plot - num schools closed gaps, by year, facetted by start year
   ggplot(data = cl_gaps_start_yr, aes(x = data_yr, y = value, fill = variable)) + 
@@ -62,27 +80,85 @@ Row
 
 ```
 
-Row
------------------------------------------------------------------------
+### Chart 1D - Percentage of Schools by EOS Start Year
 
-### Chart C
-
-```{r, fig.width = 10, fig.height = 7}
-  
-  # plot - perc schools closed gaps, by year
-  ggplot(data = cl_gaps_overall, aes(x = data_yr, y = percent, fill = variable)) + 
-                          geom_bar(stat = "identity", position = "identity")
-
-```
-
-### Chart D
-
-```{r, fig.width = 10, fig.height = 7}
+```{r, fig.width = 15, fig.height = 11}
 
   # plot - perc schools closed gaps, by year, facetted by start year
   ggplot(data = cl_gaps_start_yr, aes(x = data_yr, y = percent, fill = variable)) + 
                                   geom_bar(stat = "identity", position = "identity") +
                                   facet_wrap("start_year_with_eos")
+
+```
+
+Underrepresented Students Added (Page 2) {data-orientation=columns}
+===================================== 
+
+Column
+-----------------------------------------------------------------------
+
+### Chart 2A - Distribution of Percentage of Underrepresented Students Added to AP/IB Overal Baseline 
+
+```{r, fig.width = 10, fig.height = 7}
+
+
+  # plot - histogram of percent of ur students added (total students added > 20) 
+  ggplot(data = subset(studs_added_wide, num_ap_students_added > 20), aes(x = perc_ap_ur_students_added)) + 
+    geom_histogram() 
+  
+```
+
+Column
+-----------------------------------------------------------------------
+
+### Chart 2A - Distribution of Percentage of Underrepresented Students Added to AP/IB Overal Baseline, by Fiscal Year
+
+```{r, fig.width = 10, fig.height = 7}
+
+
+  # plot - box and whisker of percent of ur students added (total students added > 20) 
+  ggplot(data = subset(studs_added_wide, num_ap_students_added > 20), aes(x = data_yr, y = perc_ap_ur_students_added)) + 
+    geom_boxplot() +
+    stat_summary(fun.y = mean, geom = "point", shape = 5, size = 3)
+  
+```
+
+Percentage of Underrepresented Students Added by School (Page 3) {data-orientation=columns}
+===================================== 
+
+Column {.sidebar}
+-----------------------------------------------------------------------
+
+Select the fiscal year (FY) to display in the chart to the right
+
+```{r}
+
+  # define selection tab
+  selectInput("selected_yr", label = "Data Year:",
+              choices = c("2014", "2015", "2016"), selected = "2014", multiple = TRUE)
+
+```
+
+Column
+-----------------------------------------------------------------------
+
+### Chart 3a
+
+```{r}
+  
+  # Combine the selected variables into a new data frame
+  selected_data <- reactive({ 
+    
+    subset(studs_added_wide, num_ap_students_added > 20 & chmatch(data_yr, c(input$selected_yr), nomatch = 0) != 0)
+    
+  })
+
+  renderPlot({
+    
+      ggplot(data = selected_data(), aes(x = num_ap_students_added, y = perc_ap_ur_students_added)) + 
+        geom_point()
+  
+  })
 
 ```
 

@@ -95,7 +95,7 @@
   plot_perc_gaps_yr <- ggplot(data = cl_gaps_long, aes(x = data_yr, y = percent, fill = variable)) + 
                           geom_bar(stat = "identity", position = "identity")
   
-  # plot - perc schools closed gaps, by year
+  # plot - perc schools closed gaps, by year, facetted by start year
   plot_perc_gaps_yr_start_yr <- ggplot(data = cl_gaps_start_yr_long, aes(x = data_yr, y = percent, fill = variable)) + 
                                   geom_bar(stat = "identity", position = "identity") +
                                   facet_wrap("start_year_with_eos")
