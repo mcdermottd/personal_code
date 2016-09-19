@@ -59,7 +59,7 @@
   a_cl_gaps_start_yr[, not_closed_gaps := closed_gaps - total_schs]
   
   # melt closed and not closed vars long
-  cl_gaps_start_yr_long <- melt(a_cl_gaps_start_yr, measure.vars = c("closed_gaps", "not_closed_gaps"))
+  cl_gaps_start_yr_long <- melt(a_cl_gaps_start_yr, measure.vars = c("closed_gaps", "not_closed_gaps"), variable.factor = FALSE)
   
   # sum by data_yr
   cl_gaps_long <- cl_gaps_start_yr_long[, list(total_schs = sum(total_schs),
@@ -70,9 +70,9 @@
   cl_gaps_start_yr_long[, percent := value / total_schs]
   cl_gaps_long[,          percent := value / total_schs]
 
-#=======================#
-# ==== create plots ====
-#=======================#
+#========================================#
+# ==== plots - closed gaps (summary) ====
+#========================================#
   
   # plot - num schools closed gaps, by year
   plot_gaps_yr <- ggplot(cl_gaps_long, aes(x = data_yr, y = value, fill = variable)) + 
@@ -92,10 +92,14 @@
                                   geom_bar(stat = "identity", position = "identity") +
                                   facet_wrap("start_year_with_eos")
 
-           
+#===============================#
+# ==== plots - school-level ====
+#===============================# 
   
-  
-  
+  eos_data
+  # plot - scatter of schools by ur/bm students added
+  plot_gaps_yr <- ggplot(cl_gaps_long, aes(x = data_yr, y = value, fill = variable)) + 
+                    geom_bar(stat = "count", position = "identity")
   
   
   

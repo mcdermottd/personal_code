@@ -70,10 +70,7 @@
   vars_to_melt <- c(vars_to_melt, grep("total",     colnames(eos_summ_data), value = TRUE))
 
   # melt measure vars long
-  eos_data_long <- melt(eos_summ_data, measure.vars = vars_to_melt, na.rm = TRUE)
-  
-  # change "variable" from factor to character
-  eos_data_long[, variable := as.character(variable)]
+  eos_data_long <- melt(eos_summ_data, measure.vars = vars_to_melt, na.rm = TRUE, variable.factor = FALSE)
   
   # create year variable
   eos_data_long[grepl("13_14", variable), data_yr := 2014]
