@@ -46,9 +46,9 @@
 
   # set up base plot attributes / theme 
   plot_attributes <- theme(plot.background    = element_rect(fill = "lightgrey"),
-                           panel.grid.major.x = element_line(color = "gray90"), 
+                           panel.grid.major.x = element_line(color = "gray90"),
                            panel.grid.minor   = element_blank(),
-                           panel.background   = element_rect(fill = "white", colour = "black") , 
+                           panel.background   = element_rect(fill = "white", colour = "black") ,
                            panel.grid.major.y = element_line(color = "gray90"),
                            text               = element_text(size = 20),
                            plot.title         = element_text(vjust = 0, colour = "black", face = "bold", size = 25))
@@ -101,7 +101,7 @@
   
   # c("#3B9AB2", "#78B7C5", "#EBCC2A", "#E1AF00", "#F21A00"))
   
-  # plot - num schools closed gaps, by year
+  # plot - num schools closed gaps, by year (Chart 1A)
   plot_gaps_yr <- ggplot(data = cl_gaps_overall, aes(x = data_yr, y = value, fill = variable)) + 
                     geom_bar(stat = "identity", position = "identity") +
                     scale_y_continuous(breaks = seq(-100, 100, 25), limits = c(-100, 100)) +
@@ -111,18 +111,7 @@
                     labs(x = "Year (FY)", y = "Number of Schools") +
                     plot_attributes
   
-  # plot - num schools closed gaps, by year, facetted by start year
-  plot_gaps_yr_start_yr <- ggplot(data = cl_gaps_start_yr, aes(x = data_yr, y = value, fill = variable)) + 
-                            geom_bar(stat = "identity", position = "identity") + 
-                            facet_wrap("start_year_with_eos") +
-                            scale_y_continuous(breaks = seq(-75, 75, 25), limits = c(-75, 75)) +
-                            scale_fill_manual(values = c("#3B9AB2", "#F21A00"), 
-                                              labels = c("Closed Gaps", "Did Not Close Gaps")) +
-                            theme(legend.title = element_blank()) +
-                            labs(x = "Year (FY)", y = "Number of Schools") +
-                            plot_attributes
-  
-  # plot - perc schools closed gaps, by year
+  # plot - perc schools closed gaps, by year (Chart 1B)
   plot_perc_gaps_yr <- ggplot(data = cl_gaps_overall, aes(x = data_yr, y = percent, fill = variable)) + 
                           geom_bar(stat = "identity", position = "identity") +
                           scale_y_continuous(breaks = seq(-1, 1, .25), limits = c(-1, 1)) +
@@ -132,7 +121,20 @@
                           labs(x = "Year (FY)", y = "Number of Schools") +
                           plot_attributes
   
-  # plot - perc schools closed gaps, by year, facetted by start year
+  # plot - num schools closed gaps, by year, facetted by start year (Chart 1C)
+  plot_gaps_yr_start_yr <- ggplot(data = cl_gaps_start_yr, aes(x = data_yr, y = value, fill = variable)) + 
+                            geom_bar(stat = "identity", position = "identity") + 
+                            facet_wrap("start_year_with_eos") +
+                            # facet_grid(start_year_with_eos ~ .) +
+                            # coord_flip() + scale_x_reverse() +
+                            scale_y_continuous(breaks = seq(-75, 75, 25), limits = c(-75, 75)) +
+                            scale_fill_manual(values = c("#3B9AB2", "#F21A00"), 
+                                              labels = c("Closed Gaps", "Did Not Close Gaps")) +
+                            theme(legend.title = element_blank()) +
+                            labs(x = "Year (FY)", y = "Number of Schools") +
+                            plot_attributes
+  
+  # plot - perc schools closed gaps, by year, facetted by start year (Chart 1D)
   plot_perc_gaps_yr_start_yr <- ggplot(data = cl_gaps_start_yr, aes(x = data_yr, y = percent, fill = variable)) + 
                                   geom_bar(stat = "identity", position = "identity") +
                                   facet_wrap("start_year_with_eos") +

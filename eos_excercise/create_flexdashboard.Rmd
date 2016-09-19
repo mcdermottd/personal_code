@@ -33,13 +33,8 @@ runtime: shiny
   wes_pal <- wes_palette(name = "Zissou", type = "continuous")
 
   # set up base plot attributes / theme 
-  plot_attributes <- theme(plot.background    = element_rect(fill = "lightgrey"),
-                           panel.grid.major.x = element_line(color = "gray90"), 
-                           panel.grid.minor   = element_blank(),
-                           panel.background   = element_rect(fill = "white", colour = "black") , 
-                           panel.grid.major.y = element_line(color = "gray90"),
-                           text               = element_text(size = 20),
-                           plot.title         = element_text(vjust = 0, colour = "black", face = "bold", size = 25))
+  plot_attributes <- theme(text       = element_text(size = 20),
+                           plot.title = element_text(vjust = 0, colour = "black", face = "bold", size = 25))
 
 #====================#
 # ==== load data ====
@@ -98,7 +93,13 @@ Column
   
   # plot - num schools closed gaps, by year
   ggplot(data = cl_gaps_overall, aes(x = data_yr, y = value, fill = variable)) + 
-    geom_bar(stat = "identity", position = "identity")
+    geom_bar(stat = "identity", position = "identity") +
+    scale_y_continuous(breaks = seq(-100, 100, 25), limits = c(-100, 100)) +
+    scale_fill_manual(values = c("#3B9AB2", "#F21A00"), 
+                      labels = c("Closed Gaps", "Did Not Close Gaps")) +
+    theme(legend.title = element_blank()) +
+    labs(x = "Year (FY)", y = "Number of Schools") +
+    plot_attributes
 
 ```
 
@@ -108,7 +109,13 @@ Column
   
   # plot - perc schools closed gaps, by year
   ggplot(data = cl_gaps_overall, aes(x = data_yr, y = percent, fill = variable)) + 
-                          geom_bar(stat = "identity", position = "identity")
+    geom_bar(stat = "identity", position = "identity") +
+    scale_y_continuous(breaks = seq(-1, 1, .25), limits = c(-1, 1)) +
+    scale_fill_manual(values = c("#3B9AB2", "#F21A00"), 
+                      guide  = FALSE) +
+    theme(legend.title = element_blank()) +
+    labs(x = "Year (FY)", y = "Number of Schools") +
+    plot_attributes
 
 
 ```
@@ -122,8 +129,14 @@ Column {.tabset .tabset-fade}
   
   # plot - num schools closed gaps, by year, facetted by start year
   ggplot(data = cl_gaps_start_yr, aes(x = data_yr, y = value, fill = variable)) + 
-                            geom_bar(stat = "identity", position = "identity") + 
-                            facet_wrap("start_year_with_eos")
+    geom_bar(stat = "identity", position = "identity") + 
+    facet_wrap("start_year_with_eos") +
+    scale_y_continuous(breaks = seq(-75, 75, 25), limits = c(-75, 75)) +
+    scale_fill_manual(values = c("#3B9AB2", "#F21A00"), 
+                      guide  = FALSE) +
+    theme(legend.title = element_blank()) +
+    labs(x = "Year (FY)", y = "Number of Schools") +
+    plot_attributes
 
 ```
 
@@ -133,75 +146,81 @@ Column {.tabset .tabset-fade}
 
   # plot - perc schools closed gaps, by year, facetted by start year
   ggplot(data = cl_gaps_start_yr, aes(x = data_yr, y = percent, fill = variable)) + 
-                                  geom_bar(stat = "identity", position = "identity") +
-                                  facet_wrap("start_year_with_eos")
+    geom_bar(stat = "identity", position = "identity") +
+    facet_wrap("start_year_with_eos") +
+    scale_y_continuous(breaks = seq(-1, 1, .25), limits = c(-1, 1)) +
+    scale_fill_manual(values = c("#3B9AB2", "#F21A00"), 
+                      guide  = FALSE) +
+    theme(legend.title = element_blank()) +
+    labs(x = "Year (FY)", y = "Number of Schools") +
+    plot_attributes
 
 ```
 
-Underrepresented Students Added (Page 2) {data-orientation=columns}
-===================================== 
+<!-- Underrepresented Students Added (Page 2) {data-orientation=columns} -->
+<!-- ===================================== -->
 
-Column
------------------------------------------------------------------------
+<!-- Column -->
+<!-- ----------------------------------------------------------------------- -->
 
-### Chart 2A - Distribution of Percentage of Underrepresented Students Added to AP/IB Overal Baseline 
+<!-- ### Chart 2A - Distribution of Percentage of Underrepresented Students Added to AP/IB Overal Baseline -->
 
-```{r, fig.width = 10, fig.height = 7}
-
-
-  # plot - histogram of percent of ur students added (total students added > 20) 
-  ggplot(data = subset(studs_added_wide, num_ap_students_added > 20), aes(x = perc_ap_ur_students_added)) + 
-    geom_histogram() 
-  
-```
-
-Column
------------------------------------------------------------------------
-
-### Chart 2A - Distribution of Percentage of Underrepresented Students Added to AP/IB Overal Baseline, by Fiscal Year
-
-```{r, fig.width = 10, fig.height = 7}
+<!-- ```{r, fig.width = 10, fig.height = 7} -->
 
 
-  # plot - box and whisker of percent of ur students added (total students added > 20) 
-  ggplot(data = subset(studs_added_wide, num_ap_students_added > 20), aes(x = data_yr, y = perc_ap_ur_students_added)) + 
-    geom_boxplot() +
-    stat_summary(fun.y = mean, geom = "point", shape = 5, size = 3)
-  
-```
+<!--   # plot - histogram of percent of ur students added (total students added > 20) -->
+<!--   ggplot(data = subset(studs_added_wide, num_ap_students_added > 20), aes(x = perc_ap_ur_students_added)) + -->
+<!--     geom_histogram() -->
 
-Percentage of Underrepresented Students Added by School (Page 3) {data-orientation=columns}
-===================================== 
+<!-- ``` -->
 
-Column {.sidebar}
------------------------------------------------------------------------
+<!-- Column -->
+<!-- ----------------------------------------------------------------------- -->
 
-Select the fiscal year (FY) to display in the chart to the right
+<!-- ### Chart 2A - Distribution of Percentage of Underrepresented Students Added to AP/IB Overal Baseline, by Fiscal Year -->
 
-```{r}
+<!-- ```{r, fig.width = 10, fig.height = 7} -->
 
-  # define selection tab
-  selectInput("selected_yr", label = "Data Year:",
-              choices = c("2014", "2015", "2016"), selected = "2014", multiple = TRUE)
 
-```
+<!--   # plot - box and whisker of percent of ur students added (total students added > 20) -->
+<!--   ggplot(data = subset(studs_added_wide, num_ap_students_added > 20), aes(x = data_yr, y = perc_ap_ur_students_added)) + -->
+<!--     geom_boxplot() + -->
+<!--     stat_summary(fun.y = mean, geom = "point", shape = 5, size = 3) -->
 
-Column
------------------------------------------------------------------------
+<!-- ``` -->
 
-### Chart 3a
+<!-- Percentage of Underrepresented Students Added by School (Page 3) {data-orientation=columns} -->
+<!-- ===================================== -->
 
-```{r}
-  
-  # Combine the selected variables into a new data frame
-  selected_data <- reactive({ subset(studs_added_wide, num_ap_students_added > 20 & chmatch(data_yr, c(input$selected_yr), nomatch = 0) != 0) })
+<!-- Column {.sidebar} -->
+<!-- ----------------------------------------------------------------------- -->
 
-  renderPlot({
-    
-      ggplot(data = selected_data(), aes(x = num_ap_students_added, y = perc_ap_ur_students_added)) + 
-        geom_point()
-  
-  })
+<!-- Select the fiscal year (FY) to display in the chart to the right -->
 
-```
+<!-- ```{r} -->
+
+<!--   # define selection tab -->
+<!--   selectInput("selected_yr", label = "Data Year:", -->
+<!--               choices = c("2014", "2015", "2016"), selected = "2014", multiple = TRUE) -->
+
+<!-- ``` -->
+
+<!-- Column -->
+<!-- ----------------------------------------------------------------------- -->
+
+<!-- ### Chart 3a -->
+
+<!-- ```{r} -->
+
+<!--   # Combine the selected variables into a new data frame -->
+<!--   selected_data <- reactive({ subset(studs_added_wide, num_ap_students_added > 20 & chmatch(data_yr, c(input$selected_yr), nomatch = 0) != 0) }) -->
+
+<!--   renderPlot({ -->
+
+<!--       ggplot(data = selected_data(), aes(x = num_ap_students_added, y = perc_ap_ur_students_added)) + -->
+<!--         geom_point() -->
+
+<!--   }) -->
+
+<!-- ``` -->
 
