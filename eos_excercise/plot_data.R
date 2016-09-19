@@ -43,8 +43,72 @@
   # load data
   in_eos_data_long <- ea_load(paste0(p_dir_root, "data/most_recent/eos_data_long.rdata"))
     
+#===================================================#
+# ==== create additional data sets for plotting ====
+#===================================================#
 
+  # copy loaded data
+  eos_data <- copy(in_eos_data_long)
+  
+  # calculate total number of schs that closed gaps, by year
+  a_tot_closed_gaps <- eos_data[variable == "closed_gaps", list(total_schs  = .N,
+                                                                closed_gaps = sum(value)),
+                                by = data_yr]
+  
+  # create variable for schools that didn't close gaps
+  a_tot_closed_gaps[, not_closed_gaps := closed_gaps - total_schs]
+  
+  # melt closed and not closed vars long
+  tot_gaps_long <- melt(a_tot_closed_gaps, measure.vars = c("closed_gaps", "not_closed_gaps"))
+  
+  # create percentage of schools var
+  tot_gaps_long[, percent := value / total_schs]
+  
+#=======================#
+# ==== create plots ====
+#=======================#
+  
+  # plot - num schools closed gaps, by year
+  plot_gaps_yr <- ggplot(tot_gaps_long, aes(x = data_yr, y = value, fill = variable)) + 
+                          geom_bar(stat = "identity", position = "identity")
+  
+  # plot - perc schools closed gaps, by year
+  plot_perc_gaps_yr <- ggplot(tot_gaps_long, aes(x = data_yr, y = percent, fill = variable)) + 
+                          geom_bar(stat = "identity", position = "identity")
+  
 
+  
+  
+  
+  
+  
+  
+  
+  p <- ggplot(subset(eos_data, variable == "closed_gaps"), aes(x = data_yr)) +  
+        geom_bar(aes(y = ..count..))
+  
+  plot_closed_gaps <- ggplot(data = a_tot_closed_gaps, aes(x = data_yr, y = total_schs)) 
+
+  
+  # histogram 
+  plot_hist_closed_gaps <- ggplot(data = subset(eos_data, variable == "closed_gaps"), aes(x = data_yr, y = sum(value))) 
+  
+  
+  + 
+                                 geom_histogram(binwidth = 15, colour = "black", fill = "dodgerblue4") 
+
+  
+  ggplot(data=dat1, aes(x = time, y = total_bill, fill = sex)) +
+    geom_bar(stat="identity", position=position_dodge())
+  
+  # line graph
+  
+  
+  # box and whisker plot - percentage of ap ur students
+  
+  # scatter plot - percentage of ap ur students above baseline by percentage of bm students above baseline (point for each school)
+  
+  # does multiply years of EOS participation matter - increase percentage of ap ur students above baseline (is baseline reset every year?)
 #=================#
 # ==== export ====
 #=================#
