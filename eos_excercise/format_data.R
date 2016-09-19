@@ -121,67 +121,28 @@
   eos_data_long[variable == "num_benchmark_students_added_over_baseline", variable := "num_ap_bm_students_added"]
   eos_data_long[variable == "perc_benchmark_students_added_over_baseline", variable := "perc_ap_bm_students_added"]
   eos_data_long[variable == "total_students_added_to_ap_ib_over_baseline", variable := "num_ap_students_added"]
-
-#===================================================#
-# ==== create additional data sets for plotting ====
-#===================================================#
-
-  # calculate total number of schs that closed gaps, by year
-  a_cl_gaps_start_yr <- eos_data_long[variable == "closed_gaps", list(total_schs  = .N,
-                                                                      closed_gaps = sum(value)),
-                                      by = c("start_year_with_eos", "data_yr")]
-  
-  # create variable for schools that didn't close gaps
-  a_cl_gaps_start_yr[, not_closed_gaps := closed_gaps - total_schs]
-  
-  # melt closed and not closed vars long
-  cl_gaps_start_yr_long <- melt(a_cl_gaps_start_yr, measure.vars = c("closed_gaps", "not_closed_gaps"), variable.factor = FALSE)
-  
-  # sum by data_yr
-  cl_gaps_long <- cl_gaps_start_yr_long[, list(total_schs = sum(total_schs),
-                                               value      = sum(value)),
-                                        by = c("data_yr", "variable")]
-  
-  # create percentage of schools var
-  cl_gaps_start_yr_long[, percent := value / total_schs]
-  cl_gaps_long[,          percent := value / total_schs]
-  
-  # cast students added variables wide, by year
-  wide_studs_added <- dcast(subset(eos_data_long, variable != "closed_gaps"), district_id + school_id + num_of_years_of_data + start_year_with_eos + 
-                              num_of_years_gaps_closed + num_of_ur_added_in_3_years + num_of_ur_added_across_district + data_yr ~ variable, 
-                            value.var = c("value"))
-
-  # set data year to character
-  wide_studs_added[, data_yr := as.character(data_yr)]
   
 #=================#
 # ==== export ====
 #=================#
 
   # copy long file to export
-  out_data_long           <- copy(eos_data_long)
-  out_cl_gaps_start_yr    <- copy(cl_gaps_start_yr_long)
-  out_cl_gaps             <- copy(cl_gaps_long)
-  out_wide_students_added <- copy(wide_studs_added)
+  out_data_long <- copy(eos_data_long)
 
   # export
   if (p_opt_exp == 1) { 
     
     # create directories
     dir.create(path = p_out_dir_recent, showWarnings = FALSE, recursive = TRUE)
-    # dir.create(path = p_out_dir_date,   showWarnings = FALSE, recursive = TRUE)
+    dir.create(path = p_out_dir_date,   showWarnings = FALSE, recursive = TRUE)
 
     # export data as rdata file
     save(out_data_long, file = paste0(p_out_dir_recent, "eos_data_long.rdata"), compress = TRUE)
-    # save(out_data_long, file = paste0(p_out_dir_date,   "eos_data_long.rdata"), compress = TRUE) 
-    
-    save(out_cl_gaps_start_yr,    file = paste0(p_out_dir_recent, "cl_gaps_start_yr.rdata"), compress = TRUE)
-    save(out_cl_gaps,             file = paste0(p_out_dir_recent, "cl_gaps_overall.rdata"), compress = TRUE)
-    save(out_wide_students_added, file = paste0(p_out_dir_recent, "students_added_wide_data.rdata"), compress = TRUE)
+    save(out_data_long, file = paste0(p_out_dir_date,   "eos_data_long.rdata"), compress = TRUE)
 
     # export data as csv file
-    # ea_write(out_data_long, paste0(p_out_dir_recent, "eos_data_long.csv"))
-    # ea_write(out_data_long, paste0(p_out_dir_date,   "eos_data_long.csv"))   
+    ea_write(out_data_long, paste0(p_out_dir_recent, "eos_data_long.csv"))
+    ea_write(out_data_long, paste0(p_out_dir_date,   "eos_data_long.csv"))
     
   }
 

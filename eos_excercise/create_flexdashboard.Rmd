@@ -18,6 +18,7 @@ runtime: shiny
   ea_start()
   
   library(flexdashboard)
+  library(wesanderson)
   library(ggplot2)
   library(data.table)
 
@@ -27,15 +28,61 @@ runtime: shiny
   
   # set project folder
   p_dir_root <- "C:/Users/Drew/Dropbox/analysis_data/eos_excercise/data/most_recent/"
+  
+  # set wes anderson color scheme
+  wes_pal <- wes_palette(name = "Zissou", type = "continuous")
+
+  # set up base plot attributes / theme 
+  plot_attributes <- theme(plot.background    = element_rect(fill = "lightgrey"),
+                           panel.grid.major.x = element_line(color = "gray90"), 
+                           panel.grid.minor   = element_blank(),
+                           panel.background   = element_rect(fill = "white", colour = "black") , 
+                           panel.grid.major.y = element_line(color = "gray90"),
+                           text               = element_text(size = 20),
+                           plot.title         = element_text(vjust = 0, colour = "black", face = "bold", size = 25))
 
 #====================#
 # ==== load data ====
 #====================#
   
-  # load data for plotting
-  cl_gaps_overall  <- ea_load(paste0(p_dir_root, "cl_gaps_overall.rdata"))
-  cl_gaps_start_yr <- ea_load(paste0(p_dir_root, "cl_gaps_start_yr.rdata"))
-  studs_added_wide <- ea_load(paste0(p_dir_root, "students_added_wide_data.rdata"))
+  # load data
+  in_eos_data_long <- ea_load(paste0(p_dir_root, "eos_data_long.rdata"))
+  
+#===================================================#
+# ==== create additional data sets for plotting ====
+#===================================================#
+
+  # copy loaded data
+  eos_data <- copy(in_eos_data_long)
+  
+  # calculate total number of schs that closed gaps, by year
+  a_cl_gaps_start_yr <- eos_data[variable == "closed_gaps", list(total_schs  = .N,
+                                                                 closed_gaps = sum(value)),
+                                 by = c("start_year_with_eos", "data_yr")]
+  
+  # create variable for schools that didn't close gaps
+  a_cl_gaps_start_yr[, not_closed_gaps := closed_gaps - total_schs]
+  
+  # melt closed and not closed vars long
+  cl_gaps_start_yr <- melt(a_cl_gaps_start_yr, measure.vars = c("closed_gaps", "not_closed_gaps"), variable.factor = FALSE)
+  
+  # sum by data_yr
+  cl_gaps_overall <- cl_gaps_start_yr[, list(total_schs = sum(total_schs),
+                                             value      = sum(value)),
+                                      by = c("data_yr", "variable")]
+  
+  # create percentage of schools var
+  cl_gaps_start_yr[, percent := value / total_schs]
+  cl_gaps_overall[,  percent := value / total_schs]
+  
+  # cast students added variables wide, by year
+  studs_added_wide <- dcast(subset(eos_data, variable != "closed_gaps"), district_id + school_id + num_of_years_of_data + start_year_with_eos + 
+                              num_of_years_gaps_closed + num_of_ur_added_in_3_years + num_of_ur_added_across_district + data_yr ~ variable, 
+                              value.var = c("value"))
+
+  # set data year to character
+  studs_added_wide[, data_yr := as.character(data_yr)]
+  
 
 ```
 
@@ -147,11 +194,7 @@ Column
 ```{r}
   
   # Combine the selected variables into a new data frame
-  selected_data <- reactive({ 
-    
-    subset(studs_added_wide, num_ap_students_added > 20 & chmatch(data_yr, c(input$selected_yr), nomatch = 0) != 0)
-    
-  })
+  selected_data <- reactive({ subset(studs_added_wide, num_ap_students_added > 20 & chmatch(data_yr, c(input$selected_yr), nomatch = 0) != 0) })
 
   renderPlot({
     
