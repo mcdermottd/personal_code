@@ -64,13 +64,16 @@
 #===============================#
   
   # create name of measure var columns
-  vars_to_melt <-                 grep("closed_",    colnames(eos_summ_data), value = TRUE)
+  vars_to_melt <-                 grep("closed_",   colnames(eos_summ_data), value = TRUE)
   vars_to_melt <- c(vars_to_melt, grep("underrep",  colnames(eos_summ_data), value = TRUE))
   vars_to_melt <- c(vars_to_melt, grep("benchmark", colnames(eos_summ_data), value = TRUE))
   vars_to_melt <- c(vars_to_melt, grep("total",     colnames(eos_summ_data), value = TRUE))
 
   # melt measure vars long
   eos_data_long <- melt(eos_summ_data, measure.vars = vars_to_melt, na.rm = TRUE)
+  
+  # change "variable" from factor to character
+  eos_data_long[, variable := as.character(variable)]
   
   # create year variable
   eos_data_long[grepl("13_14", variable), data_yr := 2014]
