@@ -161,23 +161,24 @@ Inputs {.sidebar}
 
 ```{r}
 
-  # define selection tab
+  # define checkboxes for cohort selection
   checkboxGroupInput(inputId = "selected_cohort_p2", 
                      label = h3("EOS Start Year (FY):"),
                      choices = c("FY13-FY14", "FY14-FY15", "FY15-FY16"),
                      selected = c("FY13-FY14", "FY14-FY15", "FY15-FY16"))
 
-  # define selection tab
+  # define checkboxes for data year selection
   checkboxGroupInput(inputId ="selected_yr_p2", 
                      label = h3("Data Year (FY):"),
                      choices = c("2014", "2015", "2016"),
                      selected = "2014")
   
   
-  # combine the selected variables into a new data frame
+  # combine the selected variables into a new data frame - box and whisker
   selected_data_p2a <- reactive({ output <- subset(studs_added_wide, num_ap_students_added > 20 & 
                                                        chmatch(start_year_with_eos, c(input$selected_cohort_p2), nomatch = 0) != 0) })
   
+  # combine the selected variables into a new data frame - histogram
   selected_data_p2b <- reactive({ output <- subset(studs_added_wide, num_ap_students_added > 20 & 
                                                        chmatch(start_year_with_eos, c(input$selected_cohort_p2), nomatch = 0) != 0 & 
                                                        chmatch(data_yr, c(input$selected_yr_p2), nomatch = 0) != 0) })
@@ -187,10 +188,12 @@ Inputs {.sidebar}
 Outputs
 -----------------------------------------------------------------------
 
-### Chart 2A - Distribution of Percentage of Underrepresented Students Added to AP/IB Overal Baseline, by Fiscal Year {data-width=5}
+### Chart 2A - Distribution of Percentage of Underrepresented Students Added to AP/IB Overal Baseline, by Fiscal Year
+
 
 ```{r}
 
+  # render output chart 2A
   renderPlot({
 
     # plot - box and whisker of percent of ur students added (total students added > 20)
@@ -207,7 +210,8 @@ Outputs
   Over Baseline") +
       plot_attributes
     
-  })
+  # set plot width to 750 pixels - NEED TO FIGURE OUT ALIGNMENT
+  }, width = 750)
 
 ```
 
@@ -215,6 +219,7 @@ Outputs
 
 ```{r}
 
+  # render output chart 2B
   renderPlot({
 
     # plot - histogram of percent of ur students added (total students added > 20)
@@ -238,7 +243,7 @@ Select the fiscal year (FY) to display in the chart to the right
 
 ```{r}
 
-  # define selection tab
+  # define checkboxes for data year selection
   checkboxGroupInput(inputId ="selected_yr_p3", 
                      label = h3("Data Year (FY):"),
                      choices = c("2014", "2015", "2016"),
@@ -252,10 +257,11 @@ Select the fiscal year (FY) to display in the chart to the right
 Outputs
 -----------------------------------------------------------------------
 
-### Chart 3a
+### Chart 3A
 
 ```{r}
 
+  # render output chart 3A
   renderPlot({
 
       ggplot(data = selected_data_p3(), aes(x = num_ap_students_added, y = perc_ap_ur_students_added)) +
