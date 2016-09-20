@@ -103,32 +103,39 @@
   
   # plot - num schools closed gaps, by year (Chart 1A)
   plot_gaps_yr <- ggplot(data = cl_gaps_overall, aes(x = data_yr, y = value, fill = variable)) + 
-                    geom_bar(stat = "identity", position = "identity") +
-                    scale_y_continuous(breaks = seq(-100, 100, 25), limits = c(-100, 100)) +
+                    geom_bar(stat     = "identity", 
+                             position = "identity") +
+                    scale_y_continuous(breaks = seq(-100, 100, 25), 
+                                       limits = c(-100, 100)) +
                     scale_fill_manual(values = c("#3B9AB2", "#F21A00"), 
                                       labels = c("Closed Gaps", "Did Not Close Gaps")) +
                     theme(legend.title = element_blank()) +
-                    labs(x = "Year (FY)", y = "Number of Schools") +
+                    labs(x = "Year (FY)", 
+                         y = "Number of Schools") +
                     plot_attributes
   
   # plot - perc schools closed gaps, by year (Chart 1B)
   plot_perc_gaps_yr <- ggplot(data = cl_gaps_overall, aes(x = data_yr, y = percent, fill = variable)) + 
-                          geom_bar(stat = "identity", position = "identity") +
-                          scale_y_continuous(breaks = seq(-1, 1, .25), limits = c(-1, 1)) +
+                          geom_bar(stat     = "identity", 
+                                   position = "identity") +
+                          scale_y_continuous(breaks = seq(-1, 1, .25), 
+                                             limits = c(-1, 1)) +
                           scale_fill_manual(values = c("#3B9AB2", "#F21A00"), 
                                             labels = c("Closed Gaps", "Did Not Close Gaps")) +
                           theme(legend.title = element_blank()) +
                           labs(x = "Year (FY)", 
-                               y = "Number of Schools") +
+                               y = "Percentage of Schools") +
                           plot_attributes
   
   # plot - num schools closed gaps, by year, facetted by start year (Chart 1C)
   plot_gaps_yr_start_yr <- ggplot(data = cl_gaps_start_yr, aes(x = data_yr, y = value, fill = variable)) + 
-                            geom_bar(stat = "identity", position = "identity") + 
+                            geom_bar(stat     = "identity", 
+                                     position = "identity") + 
                             facet_wrap("start_year_with_eos") +
                             # facet_grid(start_year_with_eos ~ .) +
                             # coord_flip() + scale_x_reverse() +
-                            scale_y_continuous(breaks = seq(-75, 75, 25), limits = c(-75, 75)) +
+                            scale_y_continuous(breaks = seq(-75, 75, 25), 
+                                               limits = c(-75, 75)) +
                             scale_fill_manual(values = c("#3B9AB2", "#F21A00"), 
                                               labels = c("Closed Gaps", "Did Not Close Gaps")) +
                             theme(legend.title = element_blank()) +
@@ -138,14 +145,16 @@
   
   # plot - perc schools closed gaps, by year, facetted by start year (Chart 1D)
   plot_perc_gaps_yr_start_yr <- ggplot(data = cl_gaps_start_yr, aes(x = data_yr, y = percent, fill = variable)) + 
-                                  geom_bar(stat = "identity", position = "identity") +
+                                  geom_bar(stat     = "identity", 
+                                           position = "identity") +
                                   facet_wrap("start_year_with_eos") +
-                                  scale_y_continuous(breaks = seq(-1, 1, .25), limits = c(-1, 1)) +
+                                  scale_y_continuous(breaks = seq(-1, 1, .25), 
+                                                     limits = c(-1, 1)) +
                                   scale_fill_manual(values = c("#3B9AB2", "#F21A00"), 
                                                     labels = c("Closed Gaps", "Did Not Close Gaps")) +
                                   theme(legend.title = element_blank()) +
                                   labs(x = "Year (FY)", 
-                                       y = "Number of Schools") +
+                                       y = "Percentage of Schools") +
                                   plot_attributes
 
 #===============================================================#
@@ -195,27 +204,13 @@
   # line graph
   
   # does multiply years of EOS participation matter - increase percentage of ap ur students above baseline (is baseline reset every year?)
+  
 #=================#
 # ==== export ====
 #=================#
-
-  # copy long file to export
-  out_data_long <- copy(eos_data_long)
   
   # export
   if (p_opt_exp == 1) { 
-    
-    # create directories
-    dir.create(path = p_out_dir_recent, showWarnings = FALSE, recursive = TRUE)
-    dir.create(path = p_out_dir_date,   showWarnings = FALSE, recursive = TRUE)
-
-    # export data as rdata file
-    save(out_data_long, file = paste0(p_out_dir_recent, "eos_data_long.rdata"), compress = TRUE)
-    save(out_data_long, file = paste0(p_out_dir_date,   "eos_data_long.rdata"), compress = TRUE) 
-    
-    # export data as csv file
-    ea_write(out_data_long, paste0(p_out_dir_recent, "eos_data_long.csv"))
-    ea_write(out_data_long, paste0(p_out_dir_date,   "eos_data_long.csv"))   
     
   }
 

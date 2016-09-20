@@ -13,10 +13,12 @@ runtime: shiny
 # ==== load packages and clear objects/log ====
 #==============================================#
   
-  library(flexdashboard)
   library(wesanderson)
-  library(ggplot2)
   library(data.table)
+  library(ggplot2)
+  library(plotly)
+  library(shiny)
+  library(flexdashboard)
 
 #====================#
 # ==== set parms ====
@@ -88,15 +90,21 @@ Column
 ```{r, fig.width = 10, fig.height = 7}
   
   # plot - num schools closed gaps, by year
-  ggplot(data = cl_gaps_overall, aes(x = data_yr, y = value, fill = variable)) + 
-    geom_bar(stat = "identity", position = "identity") +
-    scale_y_continuous(breaks = seq(-100, 100, 25), limits = c(-100, 100)) +
-    scale_fill_manual(values = c("#3B9AB2", "#F21A00"), 
-                      labels = c("Closed Gaps", "Did Not Close Gaps")) +
-    theme(legend.title = element_blank()) +
-    labs(x = "Year (FY)", y = "Number of Schools") +
-    plot_attributes
+  plot_gaps_yr <- ggplot(data = cl_gaps_overall, aes(x = data_yr, y = value, fill = variable)) + 
+                    geom_bar(stat     = "identity", 
+                             position = "identity") +
+                    scale_y_continuous(breaks = seq(-100, 100, 25), 
+                                       limits = c(-100, 100)) +
+                    scale_fill_manual(values = c("#3B9AB2", "#F21A00"), 
+                                      labels = c("Closed Gaps", "Did Not Close Gaps")) +
+                    theme(legend.title = element_blank()) +
+                    labs(x = "Year (FY)", 
+                         y = "Number of Schools") +
+                    plot_attributes
 
+  # display plot
+  plot(plot_gaps_yr)
+  
 ```
 
 ### Chart 1B - Gaps Closed between Underrepresented and Benchmark Students - Percentage of Schools
@@ -104,15 +112,20 @@ Column
 ```{r, fig.width = 10, fig.height = 7}
   
   # plot - perc schools closed gaps, by year
-  ggplot(data = cl_gaps_overall, aes(x = data_yr, y = percent, fill = variable)) + 
-    geom_bar(stat = "identity", position = "identity") +
-    scale_y_continuous(breaks = seq(-1, 1, .25), limits = c(-1, 1)) +
-    scale_fill_manual(values = c("#3B9AB2", "#F21A00"), 
-                      guide  = FALSE) +
-    theme(legend.title = element_blank()) +
-    labs(x = "Year (FY)", y = "Number of Schools") +
-    plot_attributes
+  plot_perc_gaps_yr <- ggplot(data = cl_gaps_overall, aes(x = data_yr, y = percent, fill = variable)) + 
+                        geom_bar(stat     = "identity", 
+                                 position = "identity") +
+                        scale_y_continuous(breaks = seq(-1, 1, .25), 
+                                           limits = c(-1, 1)) +
+                        scale_fill_manual(values = c("#3B9AB2", "#F21A00"), 
+                                          guide  = FALSE) +
+                        theme(legend.title = element_blank()) +
+                        labs(x = "Year (FY)", 
+                             y = "Percentage of Schools") +
+                        plot_attributes
 
+  # display plot
+  plot(plot_perc_gaps_yr)
 
 ```
 
@@ -124,15 +137,21 @@ Column {.tabset .tabset-fade}
 ```{r, fig.width = 15, fig.height = 11}
   
   # plot - num schools closed gaps, by year, facetted by start year
-  ggplot(data = cl_gaps_start_yr, aes(x = data_yr, y = value, fill = variable)) + 
-    geom_bar(stat = "identity", position = "identity") + 
-    facet_wrap("start_year_with_eos") +
-    scale_y_continuous(breaks = seq(-75, 75, 25), limits = c(-75, 75)) +
-    scale_fill_manual(values = c("#3B9AB2", "#F21A00"), 
-                      guide  = FALSE) +
-    theme(legend.title = element_blank()) +
-    labs(x = "Year (FY)", y = "Number of Schools") +
-    plot_attributes
+  plot_gaps_yr_start_yr <- ggplot(data = cl_gaps_start_yr, aes(x = data_yr, y = value, fill = variable)) + 
+                            geom_bar(stat     = "identity", 
+                                     position = "identity") + 
+                            facet_wrap("start_year_with_eos") +
+                            scale_y_continuous(breaks = seq(-75, 75, 25), 
+                                               limits = c(-75, 75)) +
+                            scale_fill_manual(values = c("#3B9AB2", "#F21A00"), 
+                                              guide  = FALSE) +
+                            theme(legend.title = element_blank()) +
+                            labs(x = "Year (FY)", 
+                                 y = "Number of Schools") +
+                            plot_attributes
+
+  # display plot
+  plot(plot_gaps_yr_start_yr)
 
 ```
 
@@ -141,15 +160,21 @@ Column {.tabset .tabset-fade}
 ```{r, fig.width = 15, fig.height = 11}
 
   # plot - perc schools closed gaps, by year, facetted by start year
-  ggplot(data = cl_gaps_start_yr, aes(x = data_yr, y = percent, fill = variable)) + 
-    geom_bar(stat = "identity", position = "identity") +
-    facet_wrap("start_year_with_eos") +
-    scale_y_continuous(breaks = seq(-1, 1, .25), limits = c(-1, 1)) +
-    scale_fill_manual(values = c("#3B9AB2", "#F21A00"), 
-                      guide  = FALSE) +
-    theme(legend.title = element_blank()) +
-    labs(x = "Year (FY)", y = "Number of Schools") +
-    plot_attributes
+  plot_perc_gaps_yr_start_yr <- ggplot(data = cl_gaps_start_yr, aes(x = data_yr, y = percent, fill = variable)) + 
+                                  geom_bar(stat     = "identity", 
+                                           position = "identity") +
+                                  facet_wrap("start_year_with_eos") +
+                                  scale_y_continuous(breaks = seq(-1, 1, .25), 
+                                                     limits = c(-1, 1)) +
+                                  scale_fill_manual(values = c("#3B9AB2", "#F21A00"), 
+                                                    guide  = FALSE) +
+                                  theme(legend.title = element_blank()) +
+                                  labs(x = "Year (FY)", 
+                                       y = "Percentage of Schools") +
+                                  plot_attributes
+
+  # display plot
+  plot(plot_perc_gaps_yr_start_yr)
 
 ```
 
@@ -194,7 +219,7 @@ Outputs
 ```{r}
 
   # render output chart 2A
-  renderPlot({
+  output$plot_box_ur_added <- renderPlot({
 
     # plot - box and whisker of percent of ur students added (total students added > 20)
     ggplot(data = selected_data_p2a(), aes(x = data_yr, y = perc_ap_ur_students_added)) +
@@ -206,12 +231,16 @@ Outputs
                    shape = 5, size = 3) +
       labs(x = "Year (FY)", 
            y = "Percent of Underrepresented 
-  Students Added to AP/IB 
-  Over Baseline") +
+Students Added to AP/IB 
+Over Baseline") +
       plot_attributes
-    
-  # set plot width to 750 pixels - NEED TO FIGURE OUT ALIGNMENT
-  }, width = 750)
+  
+    # set plot width to 750 pixels - NEED TO FIGURE OUT ALIGNMENT
+    }, width = 750)
+
+  # display plot
+  plotOutput('plot_box_ur_added')
+
 
 ```
 
@@ -220,16 +249,20 @@ Outputs
 ```{r}
 
   # render output chart 2B
-  renderPlot({
+  output$plot_hist_ur_added <- renderPlot({
 
     # plot - histogram of percent of ur students added (total students added > 20)
     ggplot(data = selected_data_p2b(), aes(x = perc_ap_ur_students_added)) +
       geom_histogram(binwidth = .05,
-                     colour   = "black", fill = "#3B9AB2") +
+                     colour   = "black", 
+                     fill     = "#3B9AB2") +
       labs(x = "Percent of Underrepresented Students Added to AP/IB Over Baseline", y = "Number of Schools") +
       plot_attributes
     
   })
+
+  # display plot
+  plotOutput('plot_hist_ur_added')
 
 ```
 
@@ -262,16 +295,25 @@ Outputs
 ```{r}
 
   # render output chart 3A
-  renderPlot({
+  output$plot_scatter_ur_added <- renderPlotly({
 
-      ggplot(data = selected_data_p3(), aes(x = num_ap_students_added, y = perc_ap_ur_students_added)) +
-        geom_point(size   = 5,
-                   colour = "#3B9AB2") +
-        labs(x = "Total Number of Students Added to AP/IB Over Baseline", 
-             y = "Percent of Underrepresented Students Added to AP/IB Over Baseline") +
-        plot_attributes
+    # plot - scatter of schools, students added by perc ur students added (total students added > 20)
+    p3a <- ggplot(data = selected_data_p3(), aes(x = num_ap_students_added, y = perc_ap_ur_students_added)) +
+      geom_point(size   = 5,
+                 colour = "#3B9AB2") +
+      labs(x = "Total Number of Students Added to AP/IB Over Baseline", 
+           y = "Percent of Underrepresented Students Added to AP/IB Over Baseline")
 
+    # add plotly attributes
+    ggplotly(p3a) %>%
+      layout(xaxis = list(titlefont = list(size = 18)), 
+             yaxis = list(titlefont = list(size = 15)),
+             annotations = list(list(x = selected_data_p3()$school_id)))
+        
   })
+
+  # display plot (as plotly)
+  plotlyOutput('plot_scatter_ur_added')
 
 ```
 
