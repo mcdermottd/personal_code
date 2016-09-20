@@ -180,18 +180,19 @@
   # plot - scatter of schools, students added by perc ur students added (total students added > 20)
   plot_scatter_ur_added <- ggplot(data = subset(studs_added_wide, num_ap_students_added > 20), 
                                   aes(x = num_ap_students_added, y = perc_ap_ur_students_added)) + 
-                            geom_point()
+                            geom_point(size   = 5,
+                                       colour = "#3B9AB2") +
+                            labs(x = "Total Number of Students Added to AP/IB Over Baseline", 
+                                 y = "Percent of Underrepresented Students Added to AP/IB Over Baseline") +
+                            plot_attributes
   
-  # plot - scatter of schools, students added by perc bm students added (total students added > 20)
-  plot_scatter_bm_added <- ggplot(data = subset(studs_added_wide, num_ap_students_added > 20), 
-                                  aes(x = num_ap_students_added, y = perc_ap_bm_students_added)) + 
-                            geom_point()
+  # # plot - scatter of schools, students added by perc bm students added (total students added > 20)
+  # plot_scatter_bm_added <- ggplot(data = subset(studs_added_wide, num_ap_students_added > 20), 
+  #                                 aes(x = num_ap_students_added, y = perc_ap_bm_students_added)) + 
+  #                           geom_point()
   
   
   # line graph
-  
-  
-  # box and whisker plot - percentage of ap ur students
   
   # does multiply years of EOS participation matter - increase percentage of ap ur students above baseline (is baseline reset every year?)
 #=================#

@@ -1,0 +1,9 @@
+name: eos_flexdashboard
+account: dmcdermott
+server: shinyapps.io
+appId: 126526
+bundleId: 562151
+url: https://dmcdermott.shinyapps.io/eos_flexdashboard/
+when: 1474333845.43724
+asMultiple: FALSE
+asStatic: FALSE

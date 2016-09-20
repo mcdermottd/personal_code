@@ -1,10 +1,10 @@
 ---
-title:   "EOS Student Comparison Metrics - FY 13-14 to FY 15-16"
+title: "EOS Student Comparison Metrics - FY 13-14 to FY 15-16"
+author: "Drew McDermott"
 output:  
   flexdashboard::flex_dashboard:
   source_code: embed
 runtime: shiny
-
 ---
 
 ```{r global, include = FALSE}
@@ -12,10 +12,6 @@ runtime: shiny
 #==============================================#
 # ==== load packages and clear objects/log ====
 #==============================================#
-
-  # load easimple and clear objects log
-  library(easimple)
-  ea_start()
   
   library(flexdashboard)
   library(wesanderson)
@@ -26,9 +22,9 @@ runtime: shiny
 # ==== set parms ====
 #====================#
   
-  # set project folder
-  p_dir_root <- "C:/Users/Drew/Dropbox/analysis_data/eos_excercise/data/most_recent/"
-  
+  # set working directory to code location
+  setwd("C:/Users/Drew/Dropbox/github_clones/personal_code/eos_excercise")
+
   # set wes anderson color scheme
   wes_pal <- wes_palette(name = "Zissou", type = "continuous")
 
@@ -41,14 +37,14 @@ runtime: shiny
 #====================#
   
   # load data
-  in_eos_data_long <- ea_load(paste0(p_dir_root, "eos_data_long.rdata"))
+  load("eos_data_long.rdata")
   
 #===================================================#
 # ==== create additional data sets for plotting ====
 #===================================================#
 
   # copy loaded data
-  eos_data <- copy(in_eos_data_long)
+  eos_data <- copy(out_data_long)
   
   # calculate total number of schs that closed gaps, by year
   a_cl_gaps_start_yr <- eos_data[variable == "closed_gaps", list(total_schs  = .N,
@@ -157,7 +153,7 @@ Column {.tabset .tabset-fade}
 
 ```
 
-Underrepresented Students Added (Page 2) {data-orientation=columns}
+Underrepresented Students Added (Page 2)
 =====================================
 
 Inputs {.sidebar}
@@ -166,75 +162,76 @@ Inputs {.sidebar}
 ```{r}
 
   # define selection tab
-  checkboxGroupInput(inputId = "selected_cohort", 
+  checkboxGroupInput(inputId = "selected_cohort_p2", 
                      label = h3("EOS Start Year (FY):"),
                      choices = c("FY13-FY14", "FY14-FY15", "FY15-FY16"),
                      selected = c("FY13-FY14", "FY14-FY15", "FY15-FY16"))
 
   # define selection tab
-  checkboxGroupInput(inputId ="selected_yr", 
+  checkboxGroupInput(inputId ="selected_yr_p2", 
                      label = h3("Data Year (FY):"),
                      choices = c("2014", "2015", "2016"),
                      selected = "2014")
   
   
-  # Combine the selected variables into a new data frame
-  selected_data <- reactive({ output <- subset(studs_added_wide, num_ap_students_added > 20 & 
-                                                       chmatch(start_year_with_eos, c(input$selected_cohort), nomatch = 0) != 0 & 
-                                                       chmatch(data_yr, c(input$selected_yr), nomatch = 0) != 0) })
+  # combine the selected variables into a new data frame
+  selected_data_p2a <- reactive({ output <- subset(studs_added_wide, num_ap_students_added > 20 & 
+                                                       chmatch(start_year_with_eos, c(input$selected_cohort_p2), nomatch = 0) != 0) })
+  
+  selected_data_p2b <- reactive({ output <- subset(studs_added_wide, num_ap_students_added > 20 & 
+                                                       chmatch(start_year_with_eos, c(input$selected_cohort_p2), nomatch = 0) != 0 & 
+                                                       chmatch(data_yr, c(input$selected_yr_p2), nomatch = 0) != 0) })
 
 ```
 
-Column
+Outputs
 -----------------------------------------------------------------------
 
-### Chart 2A - Distribution of Percentage of Underrepresented Students Added to AP/IB Overal Baseline, by Fiscal Year
+### Chart 2A - Distribution of Percentage of Underrepresented Students Added to AP/IB Overal Baseline, by Fiscal Year {data-width=5}
 
 ```{r}
-
-
-  # plot - box and whisker of percent of ur students added (total students added > 20)
-  ggplot(data = subset(studs_added_wide, num_ap_students_added > 20), aes(x = data_yr, y = perc_ap_ur_students_added)) +
-    geom_boxplot(colour         = "black", 
-                 fill           = "#3B9AB2",
-                 outlier.colour = "#F21A00") +
-    stat_summary(fun.y = mean, 
-                 geom  = "point", 
-                 shape = 5, size = 3) +
-    labs(x = "Year (FY)", 
-         y = "Percent of Underrepresented 
-Students Added to AP/IB 
-Over Baseline") +
-    plot_attributes
-
-```
-
-### Chart 2B - Distribution of Percentage of Underrepresented Students Added to AP/IB Overal Baseline
-
-```{r}
-
-  # # Combine the selected variables into a new data frame
-  # selected_data <- reactive({ output <- subset(studs_added_wide, num_ap_students_added > 20 & 
-  #                                                      chmatch(start_year_with_eos, c(input$selected_cohort), nomatch = 0) != 0 & 
-  #                                                      chmatch(data_yr, c(input$selected_yr), nomatch = 0) != 0) })
 
   renderPlot({
 
-  # plot - histogram of percent of ur students added (total students added > 20)
-  ggplot(data = selected_data(), aes(x = perc_ap_ur_students_added)) +
-    geom_histogram(binwidth = .05,
-                   colour   = "black", fill = "#3B9AB2") +
-    labs(x = "Percent of Underrepresented Students Added to AP/IB Over Baseline", y = "Number of Schools") +
-    plot_attributes
+    # plot - box and whisker of percent of ur students added (total students added > 20)
+    ggplot(data = selected_data_p2a(), aes(x = data_yr, y = perc_ap_ur_students_added)) +
+      geom_boxplot(colour         = "black", 
+                   fill           = "#3B9AB2",
+                   outlier.colour = "#F21A00") +
+      stat_summary(fun.y = mean, 
+                   geom  = "point", 
+                   shape = 5, size = 3) +
+      labs(x = "Year (FY)", 
+           y = "Percent of Underrepresented 
+  Students Added to AP/IB 
+  Over Baseline") +
+      plot_attributes
     
   })
 
 ```
 
-Percentage of Underrepresented Students Added by School (Page 3) {data-orientation=columns}
+### Chart 2B - Distribution of Percentage of Underrepresented Students Added to AP/IB Over Baseline
+
+```{r}
+
+  renderPlot({
+
+    # plot - histogram of percent of ur students added (total students added > 20)
+    ggplot(data = selected_data_p2b(), aes(x = perc_ap_ur_students_added)) +
+      geom_histogram(binwidth = .05,
+                     colour   = "black", fill = "#3B9AB2") +
+      labs(x = "Percent of Underrepresented Students Added to AP/IB Over Baseline", y = "Number of Schools") +
+      plot_attributes
+    
+  })
+
+```
+
+Percentage of Underrepresented Students Added by School (Page 3)
 =====================================
 
-Column {.sidebar}
+Inputs {.sidebar}
 -----------------------------------------------------------------------
 
 Select the fiscal year (FY) to display in the chart to the right
@@ -242,25 +239,31 @@ Select the fiscal year (FY) to display in the chart to the right
 ```{r}
 
   # define selection tab
-  selectInput("selected_yr", label = "Data Year:",
-              choices = c("2014", "2015", "2016"), selected = "2014", multiple = TRUE)
+  checkboxGroupInput(inputId ="selected_yr_p3", 
+                     label = h3("Data Year (FY):"),
+                     choices = c("2014", "2015", "2016"),
+                     selected = "2014")
+
+  # combine the selected variables into a new data frame
+  selected_data_p3 <- reactive({ subset(studs_added_wide, num_ap_students_added > 20 & chmatch(data_yr, c(input$selected_yr_p3), nomatch = 0) != 0) })
 
 ```
 
-Column
+Outputs
 -----------------------------------------------------------------------
 
 ### Chart 3a
 
 ```{r}
 
-  # Combine the selected variables into a new data frame
-  selected_data <- reactive({ subset(studs_added_wide, num_ap_students_added > 20 & chmatch(data_yr, c(input$selected_yr), nomatch = 0) != 0) })
-
   renderPlot({
 
-      ggplot(data = selected_data(), aes(x = num_ap_students_added, y = perc_ap_ur_students_added)) +
-        geom_point()
+      ggplot(data = selected_data_p3(), aes(x = num_ap_students_added, y = perc_ap_ur_students_added)) +
+        geom_point(size   = 5,
+                   colour = "#3B9AB2") +
+        labs(x = "Total Number of Students Added to AP/IB Over Baseline", 
+             y = "Percent of Underrepresented Students Added to AP/IB Over Baseline") +
+        plot_attributes
 
   })
 
