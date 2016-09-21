@@ -1,6 +1,6 @@
 ---
 title: "EOS Student Comparison Metrics - FY 13-14 to FY 15-16"
-author: "Drew McDermott"
+author:
 output:  
   flexdashboard::flex_dashboard:
   source_code: embed
@@ -24,9 +24,6 @@ runtime: shiny
 #====================#
 # ==== set parms ====
 #====================#
-  
-  # set working directory to code location
-  setwd("C:/Users/Drew/Dropbox/github_clones/personal_code/eos_excercise")
 
   # set wes anderson color scheme
   wes_pal <- wes_palette(name = "Zissou", type = "continuous")
@@ -132,11 +129,10 @@ Column
                                          group = data_yr),
                                      position = position_dodge(width = 1)) +
                           scale_fill_manual(values = c("#3B9AB2", "#E1AF00"), 
-                            labels = c("Yr 1 to Yr 2", "Yr 2 to Yr 3")) +
+                            labels = c("2014 to 2015", "2015 to 2016")) +
                           theme(legend.title = element_blank()) +
                           labs(x = "EOS Start Year",
-                               y = "Number of Schools that 
-Sustained Gaps Closed") +
+                               y = "Number of Schools") +
                           plot_attributes
 
   # display plot
@@ -172,7 +168,7 @@ Column
 
 ### Chart 2B - Number of Schools by EOS Start Year
 
-```{r, fig.width = 12}
+```{r, fig.width = 10}
 
   # plot - num schools closed gaps, by year, facetted by start year
   plot_gaps_yr_start_yr <- ggplot(data = dt_cl_gaps_srt_yr, aes(x = data_yr, y = value, fill = variable)) + 
@@ -195,7 +191,7 @@ Column
 
 ### Chart 2C - Percentage of Schools by EOS Start Year
 
-```{r, fig.width = 12}
+```{r, fig.width = 10}
 
   # plot - perc schools closed gaps, by year, facetted by start year
   plot_perc_gaps_yr_start_yr <- ggplot(data = dt_cl_gaps_srt_yr, aes(x = data_yr, y = percent, fill = variable)) + 
@@ -257,7 +253,7 @@ Column
 
 ### Chart 3B - Distribution of Percentage Underrepresented Students Added to AP/IB Over Baseline, by Year
 
-```{r, fig.width = 7}
+```{r}
 
   # render output chart 2A
   output$plot_box_ur_added <- renderPlotly({
@@ -288,7 +284,7 @@ Column
 
 ### Chart 3C - Distribution of Percentage Underrepresented Students Added to AP/IB Over Baseline
 
-```{r, fig.width = 7}
+```{r}
 
   # render output chart 2B
   output$plot_hist_ur_added <- renderPlotly({
@@ -303,7 +299,10 @@ Column
     # add plotly attributes
     ggplotly(p3c) %>%
       layout(xaxis = list(titlefont = list(size = 18)), 
-             yaxis = list(titlefont = list(size = 16)))
+             yaxis = list(range     = c(0, 40),
+                          autotick  = FALSE,
+                          dtick     = 10,
+                          titlefont = list(size = 16)))
 
   })
 
@@ -338,8 +337,6 @@ Percentage of Underrepresented Students Added by School
 
 Inputs {.sidebar}
 -----------------------------------------------------------------------
-
-Select the fiscal year (FY) to display in the chart to the right
 
 ```{r}
 
@@ -376,7 +373,7 @@ Outputs
     # plot - scatter of schools, students added by perc ur students added (total students added > 20)
     p4a <- ggplot(data = selected_data_p4(), aes(x = `Students Added`, y = `Percent UR`)) + 
                             geom_point(aes(color = `EOS Start Year`,
-                                           text = paste("ID: ", district_id, "-", school_id)),
+                                           text = paste0("ID: ", district_id, "-", school_id)),
                                        size   = 5) +
                             labs(x = "Total Number of Students Added to AP/IB Over Baseline", 
                                  y = "Percent Underrepresented Students") +
@@ -384,7 +381,8 @@ Outputs
     
     # add plotly attributes
     ggplotly(p4a) %>%
-      layout(xaxis = list(titlefont = list(size = 18)), 
+      layout(xaxis = list(range     = c(-10, 400),
+                          titlefont = list(size = 18)), 
              yaxis = list(titlefont = list(size = 15)),
              margin = list(r = 300))
 
