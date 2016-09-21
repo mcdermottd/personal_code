@@ -63,20 +63,35 @@ Column
 ```{r, fig.width = 10, fig.height = 7}
   
   # plot - num schools closed gaps, by year
-  plot_gaps_yr <- ggplot(data = dt_cl_gaps_overall, aes(x = data_yr, y = value, fill = variable)) + 
-                    geom_bar(stat     = "identity", 
+  plot_gaps_yr <- ggplot(data = dt_cl_gaps_overall, aes(x = data_yr, y = value, fill = variable)) +
+                    geom_bar(stat     = "identity",
                              position = "identity") +
-                    scale_y_continuous(breaks = seq(-100, 100, 25), 
+                    scale_y_continuous(breaks = seq(-100, 100, 25),
                                        limits = c(-100, 100)) +
-                    scale_fill_manual(values = c("#3B9AB2", "#F21A00"), 
+                    scale_fill_manual(values = c("#3B9AB2", "#F21A00"),
                                       labels = c("Closed Gaps", "Did Not Close Gaps")) +
                     theme(legend.title = element_blank()) +
-                    labs(x = "Year (FY)", 
+                    labs(x = "Year (FY)",
                          y = "Number of Schools") +
                     plot_attributes
 
   # display plot
   plot(plot_gaps_yr)
+  
+  # output$plot_gaps_yr <- renderPlotly({
+  # 
+  #   p <- plot_ly(subset(dt_cl_gaps_overall, variable == "closed_gaps"), x = data_yr, y = value,
+  #                type = "bar", color = variable)
+  #   
+  #   p <- plot_ly(dt_cl_gaps_overall, x = data_yr, y = value,
+  #              type = "bar", color = variable, marker = list(color = c("#3B9AB2", "#F21A00")))
+  #   
+  #   p_final <- layout(p, barmode = 'relative')
+  # 
+  # })
+  # 
+  # # display plot (as plotly)
+  # plotlyOutput('plot_gaps_yr')
   
 ```
 
@@ -91,7 +106,7 @@ Column
                         scale_y_continuous(breaks = seq(-1, 1, .25), 
                                            limits = c(-1, 1)) +
                         scale_fill_manual(values = c("#3B9AB2", "#F21A00"), 
-                                          guide  = FALSE) +
+                                          labels = c("Closed Gaps", "Did Not Close Gaps")) +
                         theme(legend.title = element_blank()) +
                         labs(x = "Year (FY)", 
                              y = "Percentage of Schools") +
@@ -157,7 +172,7 @@ Column
 
 ### Chart 2B - Number of Schools by EOS Start Year
 
-```{r, fig.width = 10}
+```{r, fig.width = 12}
 
   # plot - num schools closed gaps, by year, facetted by start year
   plot_gaps_yr_start_yr <- ggplot(data = dt_cl_gaps_srt_yr, aes(x = data_yr, y = value, fill = variable)) + 
@@ -180,7 +195,7 @@ Column
 
 ### Chart 2C - Percentage of Schools by EOS Start Year
 
-```{r, fig.width = 10}
+```{r, fig.width = 12}
 
   # plot - perc schools closed gaps, by year, facetted by start year
   plot_perc_gaps_yr_start_yr <- ggplot(data = dt_cl_gaps_srt_yr, aes(x = data_yr, y = percent, fill = variable)) + 
@@ -190,7 +205,7 @@ Column
                                   scale_y_continuous(breaks = seq(-1, 1, .25), 
                                                      limits = c(-1, 1)) +
                                   scale_fill_manual(values = c("#3B9AB2", "#F21A00"), 
-                                                    guide  = FALSE) +
+                                                    labels = c("Closed Gaps", "Did Not Close Gaps")) +
                                   theme(legend.title = element_blank()) +
                                   labs(x = "Year (FY)", 
                                        y = "Percentage of Schools") +
@@ -240,6 +255,66 @@ Inputs {.sidebar}
 Column
 -----------------------------------------------------------------------
 
+### Chart 3B - Distribution of Percentage Underrepresented Students Added to AP/IB Over Baseline, by Year
+
+```{r, fig.width = 7}
+
+  # render output chart 2A
+  output$plot_box_ur_added <- renderPlotly({
+
+    # plot - box and whisker of percent of ur students added (total students added > 20)
+    p3b <- ggplot(data = selected_data_p3b(), aes(x = data_yr, y = perc_ap_ur_students_added)) +
+            geom_boxplot(colour         = "black", 
+                         fill           = "#3B9AB2") +
+            stat_summary(fun.y = mean, 
+                         geom  = "point", 
+                         shape = 5, size = 3) +
+            labs(x = "Year (FY)", 
+                 y = "Percent Underrepresented Students")
+    
+    # add plotly attributes
+    ggplotly(p3b) %>%
+      layout(xaxis = list(titlefont = list(size = 18)), 
+             yaxis = list(titlefont = list(size = 16)))
+
+  })
+
+  # display plot (as plotly)
+  plotlyOutput('plot_box_ur_added')
+
+
+```
+
+
+### Chart 3C - Distribution of Percentage Underrepresented Students Added to AP/IB Over Baseline
+
+```{r, fig.width = 7}
+
+  # render output chart 2B
+  output$plot_hist_ur_added <- renderPlotly({
+
+    # plot - histogram of percent of ur students added (total students added > 20)
+    p3c <- ggplot(data = selected_data_p3c(), aes(x = perc_ap_ur_students_added)) +
+            geom_histogram(binwidth = .05,
+                           colour   = "black", 
+                           fill     = "#3B9AB2") +
+            labs(x = "Percent Underrepresented Students", y = "Number of Schools")
+    
+    # add plotly attributes
+    ggplotly(p3c) %>%
+      layout(xaxis = list(titlefont = list(size = 18)), 
+             yaxis = list(titlefont = list(size = 16)))
+
+  })
+
+  # display plot (as plotly)
+  plotlyOutput('plot_hist_ur_added')
+
+```
+
+Column
+-----------------------------------------------------------------------
+
 ### Table 3A - Summary of Students Added
 
 ```{r}
@@ -257,61 +332,6 @@ Column
 
 ```
 
-Column
------------------------------------------------------------------------
-
-### Chart 3B - Distribution of Percentage of Underrepresented Students Added to AP/IB Overal Baseline, by Fiscal Year
-
-```{r}
-
-  # render output chart 2A
-  output$plot_box_ur_added <- renderPlot({
-
-    # plot - box and whisker of percent of ur students added (total students added > 20)
-    ggplot(data = selected_data_p3b(), aes(x = data_yr, y = perc_ap_ur_students_added)) +
-      geom_boxplot(colour         = "black", 
-                   fill           = "#3B9AB2",
-                   outlier.colour = "#F21A00") +
-      stat_summary(fun.y = mean, 
-                   geom  = "point", 
-                   shape = 5, size = 3) +
-      labs(x = "Year (FY)", 
-           y = "Percent of Underrepresented 
-Students Added to AP/IB 
-Over Baseline") +
-      plot_attributes
-  
-    # set plot width to 750 pixels
-    }, width = 750)
-
-  # display plot
-  plotOutput('plot_box_ur_added')
-
-
-```
-
-
-### Chart 3C - Distribution of Percentage of Underrepresented Students Added to AP/IB Over Baseline
-
-```{r}
-
-  # render output chart 2B
-  output$plot_hist_ur_added <- renderPlot({
-
-    # plot - histogram of percent of ur students added (total students added > 20)
-    ggplot(data = selected_data_p3c(), aes(x = perc_ap_ur_students_added)) +
-      geom_histogram(binwidth = .05,
-                     colour   = "black", 
-                     fill     = "#3B9AB2") +
-      labs(x = "Percent of Underrepresented Students Added to AP/IB Over Baseline", y = "Number of Schools") +
-      plot_attributes
-    
-  })
-
-  # display plot
-  plotOutput('plot_hist_ur_added')
-
-```
 
 Percentage of Underrepresented Students Added by School
 =====================================
@@ -346,7 +366,7 @@ Select the fiscal year (FY) to display in the chart to the right
 Outputs
 -----------------------------------------------------------------------
 
-### Chart 4A
+### Chart 4A - Scatter Plot of Underrepresented Students Added to AP/IB Over Baseline
 
 ```{r}
 
@@ -356,10 +376,10 @@ Outputs
     # plot - scatter of schools, students added by perc ur students added (total students added > 20)
     p4a <- ggplot(data = selected_data_p4(), aes(x = `Students Added`, y = `Percent UR`)) + 
                             geom_point(aes(color = `EOS Start Year`,
-                                           text = paste("ID: ", district_id, ", ", school_id)),
+                                           text = paste("ID: ", district_id, "-", school_id)),
                                        size   = 5) +
                             labs(x = "Total Number of Students Added to AP/IB Over Baseline", 
-                                 y = "Percent of Underrepresented Students Added to AP/IB Over Baseline") +
+                                 y = "Percent Underrepresented Students") +
                             plot_attributes
     
     # add plotly attributes
