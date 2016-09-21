@@ -48,6 +48,7 @@ runtime: shiny
   dt_cl_gaps_srt_yr    <- copy(out_list$tb_cl_gaps_srt_yr)
   dt_st_added          <- copy(out_list$tb_st_added)
   dt_st_added_wide     <- copy(out_list$eos_data_st_added)
+  dt_sus_gap           <- copy(out_list$tb_sustain_gap_cl)
 
 ```
 
@@ -101,6 +102,33 @@ Column
 
 ```
 
+Column
+-----------------------------------------------------------------------
+
+### Chart 1C - Closed Gaps Sustained Between Years Gaps
+
+```{r, fig.width = 6, fig.height = 4}
+  
+  # plot
+  plot_sustain_gap_cl <- ggplot(subset(dt_sus_gap, variable == "sustain_gap_cl"), aes(start_year_with_eos, value)) +   
+                          geom_bar(aes(fill = data_yr), stat     = "identity",
+                                                        position = "dodge") + 
+                          geom_label(aes(label = paste0(round(perc_sustain_gap_cl*100, 0), " %"), 
+                                         group = data_yr),
+                                     position = position_dodge(width = 1)) +
+                          scale_fill_manual(values = c("#3B9AB2", "#E1AF00"), 
+                            labels = c("Yr 1 to Yr 2", "Yr 2 to Yr 3")) +
+                          theme(legend.title = element_blank()) +
+                          labs(x = "EOS Start Year",
+                               y = "Number of Schools that 
+Sustained Gaps Closed") +
+                          plot_attributes
+
+  # display plot
+  plot(plot_sustain_gap_cl)
+
+```
+
 Closing Gaps (Part 2) {data-orientation=columns}
 =====================================  
 
@@ -129,7 +157,7 @@ Column
 
 ### Chart 2B - Number of Schools by EOS Start Year
 
-```{r, fig.width = 8}
+```{r, fig.width = 10}
 
   # plot - num schools closed gaps, by year, facetted by start year
   plot_gaps_yr_start_yr <- ggplot(data = dt_cl_gaps_srt_yr, aes(x = data_yr, y = value, fill = variable)) + 
@@ -152,7 +180,7 @@ Column
 
 ### Chart 2C - Percentage of Schools by EOS Start Year
 
-```{r, fig.width = 8}
+```{r, fig.width = 10}
 
   # plot - perc schools closed gaps, by year, facetted by start year
   plot_perc_gaps_yr_start_yr <- ggplot(data = dt_cl_gaps_srt_yr, aes(x = data_yr, y = percent, fill = variable)) + 
@@ -191,7 +219,7 @@ Inputs {.sidebar}
   checkboxGroupInput(inputId ="selected_yr_p2", 
                      label = h3("Data Year (FY):"),
                      choices = c("2014", "2015", "2016"),
-                     selected = "2014")
+                     selected = c("2014", "2015", "2016"))
   
   
   # combine the selected variables into a new data frame - box and whisker

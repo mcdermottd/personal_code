@@ -59,14 +59,36 @@
   
   # load data
   in_eos_data_long <- ea_load(paste0(p_dir_root, "data/most_recent/eos_data_long.rdata"))
-    
-#===================================================#
-# ==== create additional data sets for plotting ====
-#===================================================#
+  # in_eos_data      <- ea_load(paste0(p_dir_root, "data/most_recent/eos_data.rdata"))
+  
+#============================================================#
+# ==== calc schools that sustained gap closing over time ====
+#============================================================#
 
   # copy loaded data
   eos_data <- copy(in_eos_data_long)
   
+  # calculate total number of schs that closed gaps, by year
+  a_sustain_gap <- eos_data[variable == "sustain_gap", list(total_schs     = .N,
+                                                            sustain_gap_cl = sum(value)),
+                            by = c("start_year_with_eos", "data_yr")]
+  
+  # create percentage of schools var
+  a_sustain_gap[, perc_sustain_gap_cl := sustain_gap_cl / total_schs]
+
+  # create variable for schools that sustain gap
+  a_sustain_gap[, not_sustain_gap := abs(sustain_gap_cl - total_schs)]
+  
+  # melt closed and not closed vars long
+  sustain_gap_long <- melt(a_sustain_gap, measure.vars = c("sustain_gap_cl", "not_sustain_gap"), variable.factor = FALSE)
+  
+  # set data year to character
+  sustain_gap_long[, data_yr := as.character(data_yr)]
+  
+#===================================================#
+# ==== create additional data sets for plotting ====
+#===================================================#
+
   # calculate total number of schs that closed gaps, by year
   a_cl_gaps_start_yr <- eos_data[variable == "closed_gaps", list(total_schs  = .N,
                                                                  closed_gaps = sum(value)),
@@ -94,7 +116,7 @@
 
   # set data year to character
   studs_added_wide[, data_yr := as.character(data_yr)]
-
+  
 #===========================================#
 # ==== create summary tables to display ====
 #===========================================#
@@ -187,6 +209,24 @@
                                        y = "Percentage of Schools") +
                                   plot_attributes
 
+#========================================#
+# ==== plots - sustained gaps closed ====
+#========================================#
+  
+  # plot
+  plot_sustain_gap_cl <- ggplot(subset(sustain_gap_long, variable == "sustain_gap_cl"), aes(start_year_with_eos, value)) +   
+                          geom_bar(aes(fill = data_yr), stat     = "identity",
+                                                        position = "dodge") + 
+                          geom_label(aes(label = paste0(round(perc_sustain_gap_cl*100, 0), " %"), 
+                                         group = data_yr),
+                                     position = position_dodge(width = 1)) +
+                          scale_fill_manual(values = c("#3B9AB2", "#E1AF00"), 
+                            labels = c("Yr 1 to Yr 2", "Yr 2 to Yr 3")) +
+                          theme(legend.title = element_blank()) +
+                          labs(x = "EOS Start Year",
+                               y = "Number of Schools that Sustained Gaps Closed") +
+                          plot_attributes
+  
 #===============================================================#
 # ==== plots - distribution of percentage of students added ====
 #===============================================================#
@@ -246,6 +286,7 @@
                       tb_cl_gaps           = cl_gaps_overall,
                       tb_cl_gaps_srt_yr    = cl_gaps_start_yr,
                       tb_cl_gaps_srt_yr_wd = a_cl_gaps_start_yr,
+                      tb_sustain_gap_cl    = sustain_gap_long,
                       tb_st_added          = a_studs_added_avg)
   
   # export

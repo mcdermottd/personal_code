@@ -96,13 +96,11 @@
 # ==== add sustain gap variable ====
 #===================================#
 
-  eos_summ_data[is.na(closed_gaps_13_14) == FALSE & is.na(closed_gaps_14_15) == FALSE, 
+  eos_summ_data[closed_gaps_13_14 == 1 & is.na(closed_gaps_14_15) == FALSE, 
                sustain_gap_14_15 := ifelse(closed_gaps_13_14 == 1 & closed_gaps_14_15 == 1, 1, 0)]
-  eos_summ_data[is.na(closed_gaps_14_15) == FALSE & is.na(closed_gaps_15_16) == FALSE, 
+  eos_summ_data[closed_gaps_14_15 == 1 & is.na(closed_gaps_15_16) == FALSE, 
                sustain_gap_15_16 := ifelse(closed_gaps_14_15 == 1 & closed_gaps_15_16 == 1, 1, 0)]
-  eos_summ_data[is.na(closed_gaps_13_14) == FALSE & is.na(closed_gaps_14_15) == FALSE & is.na(closed_gaps_15_16) == FALSE, 
-               sustain_3yr := ifelse(closed_gaps_13_14 == 1 & closed_gaps_14_15 == 1 & closed_gaps_15_16 == 1, 1, 0)]
-    
+  
 #===============================#
 # ==== create long data set ====
 #===============================#
