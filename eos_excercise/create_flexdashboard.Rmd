@@ -98,8 +98,7 @@ runtime: shiny
                                                avg_num_add     = round(mean(num_ap_students_added, na.rm = TRUE), 2),
                                                avg_num_ur_add  = round(mean(num_ap_ur_students_added, na.rm = TRUE), 2),
                                                avg_num_bm_add  = round(mean(num_ap_bm_students_added, na.rm = TRUE), 2),
-                                               avg_perc_ur_add = round(mean(perc_ap_ur_students_added, na.rm = TRUE), 2),
-                                               avg_perc_bm_add = round(mean(perc_ap_bm_students_added, na.rm = TRUE), 2)),
+                                               avg_perc_ur_add = round(mean(perc_ap_ur_students_added, na.rm = TRUE), 2)),
                                       by = c("start_year_with_eos", "data_yr")]
   
 #===================================#
@@ -116,6 +115,8 @@ runtime: shiny
   # rename vars for display
   setnames(a_cl_gaps_start_yr, c("EOS Start Year", "Data Year", "Total Schools", "Closed Gaps - Number of Schools", 
                                  "Did Not Close Gaps - Number of Schools", "Closed Gaps - Percentage of Schools"))
+  setnames(a_studs_added_avg, c("EOS Start Year", "Data Year", "Total Schools", "Avg. Students Added to AP/IB Over Baseline", 
+                                 "Avg. Underrepresented Students Added", "Avg. Benchmark Students Added", "Avg. Percent Underrepresented"))
 
 ```
 
@@ -169,14 +170,17 @@ Column
 
 ```
 
-Column {.tabset .tabset-fade}
+Closing Gaps (Part 2) {data-orientation=columns}
+=====================================  
+
+Column
 -----------------------------------------------------------------------
 
-### Table 1A - Summary of Gaps Closed
+### Table 2A - Summary of Gaps Closed
 
 ```{r}
 
-  # display table
+  # render shiny table
   output$table_summary_gaps <- renderDataTable(a_cl_gaps_start_yr)
 
   # display table
@@ -184,10 +188,14 @@ Column {.tabset .tabset-fade}
 
 ```
 
-### Chart 1C - Number of Schools by EOS Start Year
 
-```{r, fig.width = 15, fig.height = 11}
-  
+Column
+-----------------------------------------------------------------------
+
+### Chart 2B - Number of Schools by EOS Start Year
+
+```{r, fig.width = 8}
+
   # plot - num schools closed gaps, by year, facetted by start year
   plot_gaps_yr_start_yr <- ggplot(data = cl_gaps_start_yr, aes(x = data_yr, y = value, fill = variable)) + 
                             geom_bar(stat     = "identity", 
@@ -207,9 +215,9 @@ Column {.tabset .tabset-fade}
 
 ```
 
-### Chart 1D - Percentage of Schools by EOS Start Year
+### Chart 2C - Percentage of Schools by EOS Start Year
 
-```{r, fig.width = 15, fig.height = 11}
+```{r, fig.width = 8}
 
   # plot - perc schools closed gaps, by year, facetted by start year
   plot_perc_gaps_yr_start_yr <- ggplot(data = cl_gaps_start_yr, aes(x = data_yr, y = percent, fill = variable)) + 
@@ -230,7 +238,7 @@ Column {.tabset .tabset-fade}
 
 ```
 
-Underrepresented Students Added
+Underrepresented Students Added {data-orientation=columns}
 =====================================
 
 Inputs {.sidebar}
@@ -252,21 +260,39 @@ Inputs {.sidebar}
   
   
   # combine the selected variables into a new data frame - box and whisker
-  selected_data_p2a <- reactive({ output <- subset(studs_added_wide, num_ap_students_added > 20 & 
+  selected_data_p3a <- reactive({ output <- subset(a_studs_added_avg, chmatch(`EOS Start Year`, c(input$selected_cohort_p2), nomatch = 0) != 0 & 
+                                                       chmatch(`Data Year`, c(input$selected_yr_p2), nomatch = 0) != 0) })
+
+  # combine the selected variables into a new data frame - box and whisker
+  selected_data_p3b <- reactive({ output <- subset(studs_added_wide, num_ap_students_added > 20 & 
                                                        chmatch(start_year_with_eos, c(input$selected_cohort_p2), nomatch = 0) != 0) })
   
   # combine the selected variables into a new data frame - histogram
-  selected_data_p2b <- reactive({ output <- subset(studs_added_wide, num_ap_students_added > 20 & 
+  selected_data_p3c <- reactive({ output <- subset(studs_added_wide, num_ap_students_added > 20 & 
                                                        chmatch(start_year_with_eos, c(input$selected_cohort_p2), nomatch = 0) != 0 & 
                                                        chmatch(data_yr, c(input$selected_yr_p2), nomatch = 0) != 0) })
 
 ```
 
-Outputs
+Column
 -----------------------------------------------------------------------
 
-### Chart 2A - Distribution of Percentage of Underrepresented Students Added to AP/IB Overal Baseline, by Fiscal Year
+### Table 3A - Summary of Students Added
 
+```{r}
+
+  # render shiny table
+  output$table_st_add_avg <- renderDataTable(selected_data_p3a())
+
+  # display table
+  dataTableOutput('table_st_add_avg')
+
+```
+
+Column
+-----------------------------------------------------------------------
+
+### Chart 3B - Distribution of Percentage of Underrepresented Students Added to AP/IB Overal Baseline, by Fiscal Year
 
 ```{r}
 
@@ -274,7 +300,7 @@ Outputs
   output$plot_box_ur_added <- renderPlot({
 
     # plot - box and whisker of percent of ur students added (total students added > 20)
-    ggplot(data = selected_data_p2a(), aes(x = data_yr, y = perc_ap_ur_students_added)) +
+    ggplot(data = selected_data_p3b(), aes(x = data_yr, y = perc_ap_ur_students_added)) +
       geom_boxplot(colour         = "black", 
                    fill           = "#3B9AB2",
                    outlier.colour = "#F21A00") +
@@ -296,7 +322,8 @@ Over Baseline") +
 
 ```
 
-### Chart 2B - Distribution of Percentage of Underrepresented Students Added to AP/IB Over Baseline
+
+### Chart 3C - Distribution of Percentage of Underrepresented Students Added to AP/IB Over Baseline
 
 ```{r}
 
@@ -304,7 +331,7 @@ Over Baseline") +
   output$plot_hist_ur_added <- renderPlot({
 
     # plot - histogram of percent of ur students added (total students added > 20)
-    ggplot(data = selected_data_p2b(), aes(x = perc_ap_ur_students_added)) +
+    ggplot(data = selected_data_p3c(), aes(x = perc_ap_ur_students_added)) +
       geom_histogram(binwidth = .05,
                      colour   = "black", 
                      fill     = "#3B9AB2") +
@@ -335,7 +362,7 @@ Select the fiscal year (FY) to display in the chart to the right
                      selected = "2014")
 
   # combine the selected variables into a new data frame
-  selected_data_p3 <- reactive({ subset(studs_added_wide, num_ap_students_added > 20 & chmatch(data_yr, c(input$selected_yr_p3), nomatch = 0) != 0) })
+  selected_data_p4 <- reactive({ subset(studs_added_wide, num_ap_students_added > 20 & chmatch(data_yr, c(input$selected_yr_p3), nomatch = 0) != 0) })
 
 ```
 
@@ -350,7 +377,7 @@ Outputs
   output$plot_scatter_ur_added <- renderPlotly({
 
     # plot - scatter of schools, students added by perc ur students added (total students added > 20)
-    p3a <- ggplot(data = selected_data_p3(), aes(x = num_ap_students_added, y = perc_ap_ur_students_added)) +
+    p3a <- ggplot(data = selected_data_p4(), aes(x = num_ap_students_added, y = perc_ap_ur_students_added)) +
       geom_point(size   = 5,
                  colour = "#3B9AB2") +
       labs(x = "Total Number of Students Added to AP/IB Over Baseline", 
