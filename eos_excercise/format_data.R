@@ -63,7 +63,7 @@
   eos_summ_data[is.na(closed_gaps_13_14), total_students_added_to_ap_ib_over_baseline_13_14 := NA]
   eos_summ_data[is.na(closed_gaps_14_15), total_students_added_to_ap_ib_over_baseline_14_15 := NA]
   eos_summ_data[is.na(closed_gaps_15_16), total_students_added_to_ap_ib_over_baseline_15_16 := NA]
-
+  
 #=======================================#
 # ==== fix schools with data issues ====
 #=======================================#
@@ -91,6 +91,17 @@
     
     # change inconsistent ur value to NA #brule
     eos_summ_data[school_id == 27, num_underrep_students_added_to_ap_ib_over_baseline_14_15 := NA]
+
+#===================================#
+# ==== add sustain gap variable ====
+#===================================#
+
+  eos_summ_data[is.na(closed_gaps_13_14) == FALSE & is.na(closed_gaps_14_15) == FALSE, 
+               sustain_gap_14_15 := ifelse(closed_gaps_13_14 == 1 & closed_gaps_14_15 == 1, 1, 0)]
+  eos_summ_data[is.na(closed_gaps_14_15) == FALSE & is.na(closed_gaps_15_16) == FALSE, 
+               sustain_gap_15_16 := ifelse(closed_gaps_14_15 == 1 & closed_gaps_15_16 == 1, 1, 0)]
+  eos_summ_data[is.na(closed_gaps_13_14) == FALSE & is.na(closed_gaps_14_15) == FALSE & is.na(closed_gaps_15_16) == FALSE, 
+               sustain_3yr := ifelse(closed_gaps_13_14 == 1 & closed_gaps_14_15 == 1 & closed_gaps_15_16 == 1, 1, 0)]
     
 #===============================#
 # ==== create long data set ====
@@ -101,6 +112,7 @@
   vars_to_melt <- c(vars_to_melt, grep("underrep",  colnames(eos_summ_data), value = TRUE))
   vars_to_melt <- c(vars_to_melt, grep("benchmark", colnames(eos_summ_data), value = TRUE))
   vars_to_melt <- c(vars_to_melt, grep("total",     colnames(eos_summ_data), value = TRUE))
+  vars_to_melt <- c(vars_to_melt, grep("sustain_gap",     colnames(eos_summ_data), value = TRUE))
 
   # melt measure vars long
   eos_data_long <- melt(eos_summ_data, measure.vars = vars_to_melt, na.rm = TRUE, variable.factor = FALSE)
