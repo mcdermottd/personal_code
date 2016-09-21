@@ -127,6 +127,7 @@
 #=================#
 
   # copy long file to export
+  out_data      <- copy(eos_summ_data)
   out_data_long <- copy(eos_data_long)
 
   # export
@@ -137,6 +138,8 @@
     dir.create(path = p_out_dir_date,   showWarnings = FALSE, recursive = TRUE)
 
     # export data as rdata file
+    save(out_data,      file = paste0(p_out_dir_recent, "eos_data.rdata"), compress = TRUE)
+    save(out_data,      file = paste0(p_out_dir_date,   "eos_data.rdata"), compress = TRUE)
     save(out_data_long, file = paste0(p_out_dir_recent, "eos_data_long.rdata"), compress = TRUE)
     save(out_data_long, file = paste0(p_out_dir_date,   "eos_data_long.rdata"), compress = TRUE)
 
