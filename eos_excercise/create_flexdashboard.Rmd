@@ -327,17 +327,26 @@ Select the fiscal year (FY) to display in the chart to the right
   checkboxGroupInput(inputId ="selected_yr_p3", 
                      label = h3("Data Year (FY):"),
                      choices = c("2014", "2015", "2016"),
-                     selected = "2014")
+                     selected = c("2014", "2015", "2016"))
 
   # combine the selected variables into a new data frame
-  selected_data_p4 <- reactive({ subset(dt_st_added_wide, num_ap_students_added > 20 & chmatch(data_yr, c(input$selected_yr_p3), nomatch = 0) != 0) })
+  selected_data_p4 <- reactive({ 
+    
+    # subset to schools with at least 20 students added, and selected data year
+    p4 <- subset(dt_st_added_wide, num_ap_students_added > 20 & chmatch(data_yr, c(input$selected_yr_p3), nomatch = 0) != 0)
+    
+    # rename variables for display
+    setnames(p4, c("num_ap_ur_students_added", "perc_ap_ur_students_added", "start_year_with_eos"), 
+             c("Students Added", "Percent UR", "EOS Start Year"))
+      
+  })
 
 ```
 
 Outputs
 -----------------------------------------------------------------------
 
-### Chart 3A
+### Chart 4A
 
 ```{r}
 
@@ -345,17 +354,20 @@ Outputs
   output$plot_scatter_ur_added <- renderPlotly({
 
     # plot - scatter of schools, students added by perc ur students added (total students added > 20)
-    p3a <- ggplot(data = selected_data_p4(), aes(x = num_ap_students_added, y = perc_ap_ur_students_added)) +
-      geom_point(size   = 5,
-                 colour = "#3B9AB2") +
-      labs(x = "Total Number of Students Added to AP/IB Over Baseline", 
-           y = "Percent of Underrepresented Students Added to AP/IB Over Baseline")
-
+    p4a <- ggplot(data = selected_data_p4(), aes(x = `Students Added`, y = `Percent UR`)) + 
+                            geom_point(aes(color = `EOS Start Year`,
+                                           text = paste("ID: ", district_id, ", ", school_id)),
+                                       size   = 5) +
+                            labs(x = "Total Number of Students Added to AP/IB Over Baseline", 
+                                 y = "Percent of Underrepresented Students Added to AP/IB Over Baseline") +
+                            plot_attributes
+    
     # add plotly attributes
-    ggplotly(p3a) %>%
+    ggplotly(p4a) %>%
       layout(xaxis = list(titlefont = list(size = 18)), 
-             yaxis = list(titlefont = list(size = 15)))
-        
+             yaxis = list(titlefont = list(size = 15)),
+             margin = list(r = 300))
+
   })
 
   # display plot (as plotly)

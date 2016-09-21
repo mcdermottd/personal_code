@@ -259,17 +259,13 @@
   # plot - scatter of schools, students added by perc ur students added (total students added > 20)
   plot_scatter_ur_added <- ggplot(data = subset(studs_added_wide, num_ap_students_added > 20), 
                                   aes(x = num_ap_students_added, y = perc_ap_ur_students_added)) + 
-                            geom_point(size   = 5,
-                                       colour = "#3B9AB2") +
+                            geom_point(aes(color = start_year_with_eos,
+                                           text = paste("ID: ", district_id, ", ", school_id)),
+                                       size   = 5) +
+                            scale_fill_discrete(name = "EOS Start Year") +
                             labs(x = "Total Number of Students Added to AP/IB Over Baseline", 
                                  y = "Percent of Underrepresented Students Added to AP/IB Over Baseline") +
                             plot_attributes
-  
-  # # plot - scatter of schools, students added by perc bm students added (total students added > 20)
-  # plot_scatter_bm_added <- ggplot(data = subset(studs_added_wide, num_ap_students_added > 20), 
-  #                                 aes(x = num_ap_students_added, y = perc_ap_bm_students_added)) + 
-  #                           geom_point()
-  
   
   # line graph
   
