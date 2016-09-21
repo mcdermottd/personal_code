@@ -94,6 +94,36 @@
 
   # set data year to character
   studs_added_wide[, data_yr := as.character(data_yr)]
+
+#===========================================#
+# ==== create summary tables to display ====
+#===========================================#
+  
+  # add percentage closed gaps variable to closed gaps table
+  a_cl_gaps_start_yr[, perc_cl_gaps := round(closed_gaps / total_schs, 2)]
+  
+  # calc overall avgs
+  a_cohort_avgs <- eos_data[is.na(start_year_with_eos) == FALSE, list(total_schs         = .N,
+                                                                      avg_yrs_data       = round(mean(num_of_years_of_data), 2),
+                                                                      avg_yrs_gp_cl      = round(mean(num_of_years_gaps_closed), 2),
+                                                                      avg_num_ur_add_3yr = round(mean(num_of_ur_added_in_3_years), 2)),
+                            by = c("start_year_with_eos")]
+  
+  # take mean of select vars
+  a_studs_added_avg <- studs_added_wide[, list(total_schs      = .N,
+                                               avg_num_add     = round(mean(num_ap_students_added, na.rm = TRUE), 2),
+                                               avg_num_ur_add  = round(mean(num_ap_ur_students_added, na.rm = TRUE), 2),
+                                               avg_num_bm_add  = round(mean(num_ap_bm_students_added, na.rm = TRUE), 2),
+                                               avg_perc_ur_add = round(mean(perc_ap_ur_students_added, na.rm = TRUE), 2)),
+                                      by = c("start_year_with_eos", "data_yr")]
+  
+  
+  # sort data by EOS start year
+  setkey(a_cl_gaps_start_yr, start_year_with_eos)
+  setkey(a_studs_added_avg, start_year_with_eos)
+
+  # take absolute value of did not close variable to remove negative values
+  a_cl_gaps_start_yr[, not_closed_gaps := abs(not_closed_gaps)]
   
 #========================================#
 # ==== plots - closed gaps (summary) ====
