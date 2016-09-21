@@ -239,8 +239,21 @@
 # ==== export ====
 #=================#
   
+  # define output
+  out_list <- list(eos_data_long           = eos_data,
+                      eos_data_st_added    = studs_added_wide,
+                      tb_cohort_avgs       = a_cohort_avgs,
+                      tb_cl_gaps           = cl_gaps_overall,
+                      tb_cl_gaps_srt_yr    = cl_gaps_start_yr,
+                      tb_cl_gaps_srt_yr_wd = a_cl_gaps_start_yr,
+                      tb_st_added          = a_studs_added_avg)
+  
   # export
   if (p_opt_exp == 1) { 
     
+    # export data as rdata file
+    save(out_list, file = paste0(p_out_dir_recent, "flex_dash_data.rdata"), compress = TRUE)
+    save(out_list, file = "C:/Users/Drew/Dropbox/github_clones/personal_code/eos_excercise/flex_dash_data.rdata", compress = TRUE)
+  
   }
 

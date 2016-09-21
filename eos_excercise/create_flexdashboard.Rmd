@@ -40,83 +40,14 @@ runtime: shiny
 #====================#
   
   # load data
-  load("eos_data_long.rdata")
-  load("eos_data.rdata")
-  
-#===================================================#
-# ==== create additional data sets for plotting ====
-#===================================================#
+  load("flex_dash_data.rdata")
 
   # copy loaded data
-  eos_data      <- copy(out_data)
-  eos_data_long <- copy(out_data_long)
-
-  # calculate total number of schs that closed gaps, by year
-  a_cl_gaps_start_yr <- eos_data_long[variable == "closed_gaps", list(total_schs  = .N,
-                                                                      closed_gaps = sum(value)),
-                                      by = c("start_year_with_eos", "data_yr")]
-  
-  # create variable for schools that didn't close gaps
-  a_cl_gaps_start_yr[, not_closed_gaps := closed_gaps - total_schs]
-  
-  # melt closed and not closed vars long
-  cl_gaps_start_yr <- melt(a_cl_gaps_start_yr, measure.vars = c("closed_gaps", "not_closed_gaps"), variable.factor = FALSE)
-  
-  # sum by data_yr
-  cl_gaps_overall <- cl_gaps_start_yr[, list(total_schs = sum(total_schs),
-                                             value      = sum(value)),
-                                      by = c("data_yr", "variable")]
-  
-  # create percentage of schools var
-  cl_gaps_start_yr[,   percent := value / total_schs]
-  cl_gaps_overall[,    percent := value / total_schs]
-  
-#===========================================#
-# ==== create summary tables to display ====
-#===========================================#
-
-  # cast students added variables wide, by year
-  studs_added_wide <- dcast(subset(eos_data_long, variable != "closed_gaps"), district_id + school_id + num_of_years_of_data + start_year_with_eos + 
-                              num_of_years_gaps_closed + num_of_ur_added_in_3_years + num_of_ur_added_across_district + data_yr ~ variable, 
-                              value.var = c("value"))
-
-  # set data year to character
-  studs_added_wide[, data_yr := as.character(data_yr)]
-  
-  # add percentage closed gaps variable to closed gaps table
-  a_cl_gaps_start_yr[, perc_cl_gaps := round(closed_gaps / total_schs, 2)]
-  
-  # calc overall avgs
-  a_cohort_avgs <- eos_data[is.na(start_year_with_eos) == FALSE, list(total_schs         = .N,
-                                                                      avg_yrs_data       = round(mean(num_of_years_of_data), 2),
-                                                                      avg_yrs_gp_cl      = round(mean(num_of_years_gaps_closed), 2),
-                                                                      avg_num_ur_add_3yr = round(mean(num_of_ur_added_in_3_years), 2)),
-                            by = c("start_year_with_eos")]
-  
-  # take mean of select vars
-  a_studs_added_avg <- studs_added_wide[, list(total_schs      = .N,
-                                               avg_num_add     = round(mean(num_ap_students_added, na.rm = TRUE), 2),
-                                               avg_num_ur_add  = round(mean(num_ap_ur_students_added, na.rm = TRUE), 2),
-                                               avg_num_bm_add  = round(mean(num_ap_bm_students_added, na.rm = TRUE), 2),
-                                               avg_perc_ur_add = round(mean(perc_ap_ur_students_added, na.rm = TRUE), 2)),
-                                      by = c("start_year_with_eos", "data_yr")]
-  
-#===================================#
-# ==== format tables to display ====
-#===================================#
-  
-  # sort data by EOS start year
-  setkey(a_cl_gaps_start_yr, start_year_with_eos)
-  setkey(a_studs_added_avg, start_year_with_eos)
-
-  # take absolute value of did not close variable to remove negative values
-  a_cl_gaps_start_yr[, not_closed_gaps := abs(not_closed_gaps)]
-  
-  # rename vars for display
-  setnames(a_cl_gaps_start_yr, c("EOS Start Year", "Data Year", "Total Schools", "Closed Gaps - Number of Schools", 
-                                 "Did Not Close Gaps - Number of Schools", "Closed Gaps - Percentage of Schools"))
-  setnames(a_studs_added_avg, c("EOS Start Year", "Data Year", "Total Schools", "Avg. Students Added to AP/IB Over Baseline", 
-                                 "Avg. Underrepresented Students Added", "Avg. Benchmark Students Added", "Avg. Percent Underrepresented"))
+  dt_cl_gaps_overall   <- copy(out_list$tb_cl_gaps)
+  dt_cl_gaps_srt_yr_wd <- copy(out_list$tb_cl_gaps_srt_yr_wd)
+  dt_cl_gaps_srt_yr    <- copy(out_list$tb_cl_gaps_srt_yr)
+  dt_st_added          <- copy(out_list$tb_st_added)
+  dt_st_added_wide     <- copy(out_list$eos_data_st_added)
 
 ```
 
@@ -131,7 +62,7 @@ Column
 ```{r, fig.width = 10, fig.height = 7}
   
   # plot - num schools closed gaps, by year
-  plot_gaps_yr <- ggplot(data = cl_gaps_overall, aes(x = data_yr, y = value, fill = variable)) + 
+  plot_gaps_yr <- ggplot(data = dt_cl_gaps_overall, aes(x = data_yr, y = value, fill = variable)) + 
                     geom_bar(stat     = "identity", 
                              position = "identity") +
                     scale_y_continuous(breaks = seq(-100, 100, 25), 
@@ -153,7 +84,7 @@ Column
 ```{r, fig.width = 10, fig.height = 7}
   
   # plot - perc schools closed gaps, by year
-  plot_perc_gaps_yr <- ggplot(data = cl_gaps_overall, aes(x = data_yr, y = percent, fill = variable)) + 
+  plot_perc_gaps_yr <- ggplot(data = dt_cl_gaps_overall, aes(x = data_yr, y = percent, fill = variable)) + 
                         geom_bar(stat     = "identity", 
                                  position = "identity") +
                         scale_y_continuous(breaks = seq(-1, 1, .25), 
@@ -180,8 +111,12 @@ Column
 
 ```{r}
 
+  # rename vars for display
+  setnames(dt_cl_gaps_srt_yr_wd, c("EOS Start Year", "Data Year", "Total Schools", "Closed Gaps - Number of Schools", 
+                                "Did Not Close Gaps - Number of Schools", "Closed Gaps - Percentage of Schools"))
+
   # render shiny table
-  output$table_summary_gaps <- renderDataTable(a_cl_gaps_start_yr)
+  output$table_summary_gaps <- renderDataTable(dt_cl_gaps_srt_yr_wd)
 
   # display table
   dataTableOutput('table_summary_gaps')
@@ -197,14 +132,14 @@ Column
 ```{r, fig.width = 8}
 
   # plot - num schools closed gaps, by year, facetted by start year
-  plot_gaps_yr_start_yr <- ggplot(data = cl_gaps_start_yr, aes(x = data_yr, y = value, fill = variable)) + 
+  plot_gaps_yr_start_yr <- ggplot(data = dt_cl_gaps_srt_yr, aes(x = data_yr, y = value, fill = variable)) + 
                             geom_bar(stat     = "identity", 
                                      position = "identity") + 
                             facet_wrap("start_year_with_eos") +
                             scale_y_continuous(breaks = seq(-75, 75, 25), 
                                                limits = c(-75, 75)) +
                             scale_fill_manual(values = c("#3B9AB2", "#F21A00"), 
-                                              guide  = FALSE) +
+                                              labels = c("Closed Gaps", "Did Not Close Gaps")) +
                             theme(legend.title = element_blank()) +
                             labs(x = "Year (FY)", 
                                  y = "Number of Schools") +
@@ -220,7 +155,7 @@ Column
 ```{r, fig.width = 8}
 
   # plot - perc schools closed gaps, by year, facetted by start year
-  plot_perc_gaps_yr_start_yr <- ggplot(data = cl_gaps_start_yr, aes(x = data_yr, y = percent, fill = variable)) + 
+  plot_perc_gaps_yr_start_yr <- ggplot(data = dt_cl_gaps_srt_yr, aes(x = data_yr, y = percent, fill = variable)) + 
                                   geom_bar(stat     = "identity", 
                                            position = "identity") +
                                   facet_wrap("start_year_with_eos") +
@@ -260,15 +195,15 @@ Inputs {.sidebar}
   
   
   # combine the selected variables into a new data frame - box and whisker
-  selected_data_p3a <- reactive({ output <- subset(a_studs_added_avg, chmatch(`EOS Start Year`, c(input$selected_cohort_p2), nomatch = 0) != 0 & 
-                                                       chmatch(`Data Year`, c(input$selected_yr_p2), nomatch = 0) != 0) })
+  selected_data_p3a <- reactive({ output <- subset(dt_st_added, chmatch(`start_year_with_eos`, c(input$selected_cohort_p2), nomatch = 0) != 0 & 
+                                                       chmatch(`data_yr`, c(input$selected_yr_p2), nomatch = 0) != 0) })
 
   # combine the selected variables into a new data frame - box and whisker
-  selected_data_p3b <- reactive({ output <- subset(studs_added_wide, num_ap_students_added > 20 & 
+  selected_data_p3b <- reactive({ output <- subset(dt_st_added_wide, num_ap_students_added > 20 & 
                                                        chmatch(start_year_with_eos, c(input$selected_cohort_p2), nomatch = 0) != 0) })
   
   # combine the selected variables into a new data frame - histogram
-  selected_data_p3c <- reactive({ output <- subset(studs_added_wide, num_ap_students_added > 20 & 
+  selected_data_p3c <- reactive({ output <- subset(dt_st_added_wide, num_ap_students_added > 20 & 
                                                        chmatch(start_year_with_eos, c(input$selected_cohort_p2), nomatch = 0) != 0 & 
                                                        chmatch(data_yr, c(input$selected_yr_p2), nomatch = 0) != 0) })
 
@@ -281,8 +216,13 @@ Column
 
 ```{r}
 
+  selected_data_p3a_rename <- reactive({ setnames(selected_data_p3a(), 
+                                                  c("EOS Start Year", "Data Year", "Total Schools", "Avg. Students Added to AP/IB Over Baseline", 
+                                                    "Avg. Underrepresented Students Added", "Avg. Benchmark Students Added", 
+                                                    "Avg. Percent Underrepresented")) })
+
   # render shiny table
-  output$table_st_add_avg <- renderDataTable(selected_data_p3a())
+  output$table_st_add_avg <- renderDataTable(selected_data_p3a_rename())
 
   # display table
   dataTableOutput('table_st_add_avg')
@@ -313,7 +253,7 @@ Students Added to AP/IB
 Over Baseline") +
       plot_attributes
   
-    # set plot width to 750 pixels - NEED TO FIGURE OUT ALIGNMENT
+    # set plot width to 750 pixels
     }, width = 750)
 
   # display plot
@@ -362,7 +302,7 @@ Select the fiscal year (FY) to display in the chart to the right
                      selected = "2014")
 
   # combine the selected variables into a new data frame
-  selected_data_p4 <- reactive({ subset(studs_added_wide, num_ap_students_added > 20 & chmatch(data_yr, c(input$selected_yr_p3), nomatch = 0) != 0) })
+  selected_data_p4 <- reactive({ subset(dt_st_added_wide, num_ap_students_added > 20 & chmatch(data_yr, c(input$selected_yr_p3), nomatch = 0) != 0) })
 
 ```
 
