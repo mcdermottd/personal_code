@@ -18,7 +18,6 @@
   # load packages
   library(readxl)
   library(data.table)
-  library(eaanalysis)
 
 #====================#
 # ==== set parms ====
@@ -47,8 +46,6 @@
   # load data
   in_raw_data <- ea_load(paste0(p_dir_root, "data/raw_data_file.rdata"))
 
-  
-  
   
 #=================#
 # ==== export ====
