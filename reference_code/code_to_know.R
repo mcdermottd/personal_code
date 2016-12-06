@@ -1,4 +1,8 @@
 
+# start Rserve session
+library(Rserve)
+Rserve()
+
 # install dev version of apsrtable
 # install_github("malecki/apsrtable", subdir = "pkg")
 devtools::install_github("jknowles/apsrtable", subdir = "pkg")
