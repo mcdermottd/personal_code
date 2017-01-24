@@ -1,10 +1,10 @@
 ######################################################################.
 # notes:
-# - purpose:
-# - inputs:
-# - outputs:
-# - keywords:
-# - general:
+# - purpose:  
+# - inputs:   
+# - outputs:  
+# - keywords: 
+# - general:  
 ######################################################################.
 
 #==============================================#
@@ -25,7 +25,8 @@
 
   # store timestamp
   p_timestamp  <- ea_timestamp()
-  
+  p_timestamp <- ea_scan(p_timestamp, 1, "__")
+
   # set project folder (under should be data, documents, results, qc)
   p_dir_root <- paste0("C:/Users/Drew/Dropbox/analysis_data/")
   
